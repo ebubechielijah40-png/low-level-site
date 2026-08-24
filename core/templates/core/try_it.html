@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Try it Yourself</title>
+    <link rel="stylesheet" href="{% static 'core/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/gas/gas.min.js"></script>
+    <style>
+        html, body { height: 100%; overflow: hidden; }
+        .top-bar { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); background: #0c0c0c; }
+        .split { display: grid; grid-template-columns: 1fr 1fr; height: calc(100vh - 45px); }
+        .pane { display: flex; flex-direction: column; }
+        .pane-label { padding: 0.4rem 1rem; font-size: 11px; opacity: 0.4; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        #editor_wrap { flex: 1; position: relative; }
+        #editor_cm { position: absolute; inset: 0; }
+        .CodeMirror { height: 100% !important; }
+        #output { flex: 1; padding: 1rem; background: #000; color: #00ff41; font-family: var(--font); font-size: 13px; white-space: pre-wrap; overflow-y: auto; margin: 0; border-left: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button id="run_btn">&gt; Run</button>
+        <button id="reset_btn" style="background: var(--bg); color: var(--text); border-color: var(--border);">Reset</button>
+        <span style="font-size: 12px; opacity: 0.4;">{{ initial_language }}</span>
+    </div>
+    <div class="split">
+        <div class="pane">
+            <div class="pane-label">Your Code</div>
+            <div id="editor_wrap">
+                <div id="editor_cm"></div>
+            </div>
+        </div>
+        <div class="pane">
+            <div class="pane-label">Output</div>
+            <pre id="output">Output will appear here.</pre>
+        </div>
+    </div>
+    <script>
+        const lang = "{{ initial_language }}";
+        const mode = (lang === 'Assembly' || lang === 'Machine Language') ? 'text/x-asm' : 'text/x-csrc';
+        const initialCode = "{{ initial_code|escapejs }}";
+
+        const editor = CodeMirror(document.getElementById('editor_cm'), {
+            value: initialCode,
+            mode: mode,
+            lineNumbers: true,
+            styleActiveLine: true,
+            theme: 'default'
+        });
+
+        function getCookie(name) {
+            let v = '; ' + document.cookie;
+            let p = v.split('; ' + name + '=');
+            if (p.length === 2) return p.pop().split(';').shift();
+        }
+
+        document.getElementById('run_btn').addEventListener('click', async function() {
+            const out = document.getElementById('output');
+            this.textContent = 'Running...';
+            this.disabled = true;
+            out.textContent = 'Compiling...';
+            try {
+                const r = await fetch('/run/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                    body: JSON.stringify({code: editor.getValue(), language: lang})
+                });
+                const d = await r.json();
+                out.style.color = d.error ? '#ff4444' : '#00ff41';
+                out.textContent = d.error || d.output || '(no output)';
+            } catch(e) {
+                out.style.color = '#ff4444';
+                out.textContent = 'Request failed: ' + e.message;
+            } finally {
+                this.textContent = '> Run';
+                this.disabled = false;
+            }
+        });
+
+        document.getElementById('reset_btn').addEventListener('click', function() {
+            editor.setValue(initialCode);
+            const out = document.getElementById('output');
+            out.style.color = '#00ff41';
+            out.textContent = 'Output will appear here.';
+        });
+    </script>
+</body>
+</html>

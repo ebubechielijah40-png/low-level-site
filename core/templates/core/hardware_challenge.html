@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div style="display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 53px); overflow: hidden;">
+
+    <!-- LEFT: BRIEFING -->
+    <div style="border-right: 1px solid var(--border); overflow-y: auto; padding: 1.5rem;">
+        <a href="{% url 'hardware_detail' system.slug %}" style="font-size: 12px; opacity: 0.5;">&larr; {{ system.name }}</a>
+        <h2 style="margin-top: 1rem; font-size: 1rem;">{{ challenge.title }}</h2>
+        <p style="opacity: 0.6; margin: 1rem 0; font-size: 13px;">{{ challenge.description }}</p>
+        <hr style="border-color: var(--border); margin: 1rem 0;">
+        <p style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 0.5rem;">Instructions</p>
+        <p style="font-size: 13px; line-height: 1.7;">{{ challenge.instructions }}</p>
+        <hr style="border-color: var(--border); margin: 1rem 0;">
+        <p style="font-size: 11px; opacity: 0.4; text-transform: uppercase; margin-bottom: 0.5rem;">Architecture</p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="?lang=c&arch=x86-64" style="padding: 4px 8px; font-size: 12px; border: 1px solid var(--border); background: {% if lang == 'c' %}var(--accent); color: var(--bg){% else %}transparent{% endif %};">C</a>
+            <a href="?lang=asm&arch=x86-64" style="padding: 4px 8px; font-size: 12px; border: 1px solid var(--border); background: {% if lang == 'asm' %}var(--accent); color: var(--bg){% else %}transparent{% endif %};">x86-64 ASM</a>
+            <a href="?lang=arm&arch=arm64" style="padding: 4px 8px; font-size: 12px; border: 1px solid var(--border); background: {% if lang == 'arm' %}var(--accent); color: var(--bg){% else %}transparent{% endif %};">ARM64 ASM</a>
+        </div>
+    </div>
+
+    <!-- RIGHT: EDITOR + OUTPUT -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;">
+
+        <!-- EDITOR -->
+        <div style="display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden;">
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); font-size: 11px; opacity: 0.4; text-transform: uppercase;">
+                {{ system.name }} — {{ lang|upper }}
+            </div>
+            <div id="editor_wrap" style="flex: 1; position: relative;">
+                <div id="editor_cm" style="position: absolute; inset: 0;"></div>
+            </div>
+            <div style="display: flex; gap: 8px; padding: 8px; border-top: 1px solid var(--border);">
+                <button id="run_btn">&gt; Execute</button>
+                <form method="POST" action="{% url 'hardware_complete' system.slug challenge.pk %}" style="margin-left: auto;">
+                    {% csrf_token %}
+                    <input type="hidden" name="language" value="{{ lang }}">
+                    <button type="submit" style="background: var(--bg); color: var(--accent); border-color: var(--accent);">Mission Complete &#8594;</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- OUTPUT -->
+        <div style="display: flex; flex-direction: column; overflow: hidden;">
+            <div style="padding: 0.5rem 1rem; border-bottom: 1px solid var(--border); font-size: 11px; opacity: 0.4; text-transform: uppercase;">System Output</div>
+            <pre id="output" style="flex: 1; overflow-y: auto; padding: 1rem; background: #000; color: #00ff41; font-family: var(--font); font-size: 13px; white-space: pre-wrap; margin: 0;">Awaiting execution...</pre>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const lang = "{{ lang }}";
+const arch = "{{ arch }}";
+const mode = lang === 'c' ? 'text/x-csrc' : 'text/x-asm';
+const starter = `{{ starter_code|escapejs }}`;
+
+const editor = CodeMirror(document.getElementById('editor_cm'), {
+    value: starter,
+    mode: mode,
+    lineNumbers: true,
+    styleActiveLine: true,
+    theme: 'default'
+});
+
+function getCookie(name) {
+    let v = '; ' + document.cookie;
+    let p = v.split('; ' + name + '=');
+    if (p.length === 2) return p.pop().split(';').shift();
+}
+
+document.getElementById('run_btn').addEventListener('click', async function() {
+    const out = document.getElementById('output');
+    this.textContent = 'Running...';
+    this.disabled = true;
+    out.textContent = 'Compiling...';
+    const langName = lang === 'c' ? 'C' : 'Assembly';
+    try {
+        const r = await fetch("{% url 'run_code' %}", {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+            body: JSON.stringify({code: editor.getValue(), language: langName, architecture: arch})
+        });
+        const d = await r.json();
+        out.style.color = d.error ? '#ff4444' : '#00ff41';
+        out.textContent = d.error || d.output || '(no output)';
+    } catch(e) {
+        out.style.color = '#ff4444';
+        out.textContent = 'Request failed: ' + e.message;
+    } finally {
+        this.textContent = '> Execute';
+        this.disabled = false;
+    }
+});
+</script>
+{% endblock %}

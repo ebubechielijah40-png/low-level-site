@@ -1,0 +1,30 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container" style="padding-top: 4rem;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Computer Languages</h1>
+    <p style="color: #aaa; max-width: 500px; margin-bottom: 2rem;">
+        Documentation, examples, and interactive practice for C, Assembly, and Machine Language.
+        For those who want to understand how computers actually work.
+    </p>
+    <div style="display: flex; gap: 4rem; margin-bottom: 3rem;">
+        <div>
+            <p>&#10003; &nbsp; Structured lessons</p>
+            <p>&#10003; &nbsp; Interactive editor</p>
+            <p>&#10003; &nbsp; Real code execution</p>
+        </div>
+        <div>
+            <p>&#10003; &nbsp; Progress tracking</p>
+            <p>&#10003; &nbsp; Hardware challenges</p>
+            <p>&#10003; &nbsp; C and Assembly</p>
+        </div>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+        {% if user.is_authenticated %}
+            <a href="{% url 'language_list' %}"><button>Continue Learning</button></a>
+        {% else %}
+            <a href="{% url 'register' %}"><button>Get Started</button></a>
+            <a href="{% url 'login' %}" style="font-size: 13px; opacity: 0.6;">Sign In</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container">
+    <a href="{% url 'hardware_list' %}" style="font-size: 12px; opacity: 0.5;">&larr; Hardware</a>
+    <h1 style="margin-top: 1rem;">{{ system.name }}</h1>
+    <p style="opacity: 0.6; margin-bottom: 2rem;">{{ system.description }}</p>
+    <h3 style="margin-bottom: 1rem;">Challenges</h3>
+    <ul>
+        {% for challenge in challenges %}
+        <li style="margin-bottom: 0.75rem;">
+            <a href="{% url 'hardware_challenge' system.slug challenge.pk %}">
+                {% if challenge.pk in completed_ids %}[&#10003;]{% else %}[ ]{% endif %}
+                {{ challenge.order }}. {{ challenge.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

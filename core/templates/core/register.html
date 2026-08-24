@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container" style="max-width: 400px; padding-top: 4rem;">
+    <h2 style="margin-bottom: 2rem;">Create Account</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">USERNAME</label>
+            <input type="text" name="username">
+            {% if form.username.errors %}<p style="color: #ff4444; font-size: 12px;">{{ form.username.errors }}</p>{% endif %}
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">EMAIL</label>
+            <input type="email" name="email">
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">PASSWORD</label>
+            <input type="password" name="password">
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">CONFIRM PASSWORD</label>
+            <input type="password" name="confirm_password">
+            {% if form.confirm_password.errors %}<p style="color: #ff4444; font-size: 12px;">{{ form.confirm_password.errors }}</p>{% endif %}
+        </div>
+        <button type="submit">Create Account</button>
+    </form>
+    <p style="margin-top: 1rem; font-size: 13px; opacity: 0.6;">
+        Already have an account? <a href="{% url 'login' %}">Sign In</a>
+    </p>
+</div>
+{% endblock %}

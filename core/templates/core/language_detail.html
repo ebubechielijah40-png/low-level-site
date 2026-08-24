@@ -1,0 +1,18 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container">
+    <h1>{{ language.name }}</h1>
+    <p style="opacity: 0.7; margin-bottom: 2rem;">{{ language.description }}</p>
+    <h3 style="margin-bottom: 1rem;">Lessons</h3>
+    <ul>
+        {% for lesson in lessons %}
+        <li style="margin-bottom: 0.5rem;">
+            <a href="{% url 'lesson_detail' language.pk lesson.order %}">
+                {% if lesson.pk in completed_ids %}[&#10003;]{% else %}[ ]{% endif %}
+                {{ lesson.order }}. {{ lesson.title }}
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

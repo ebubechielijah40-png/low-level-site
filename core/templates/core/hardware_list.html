@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Hardware Systems</h1>
+    {% if is_locked %}
+    <p style="color: #ff4444; margin-bottom: 1rem;">
+        ACCESS DENIED — Complete 5 lessons in any language to unlock hardware challenges.
+    </p>
+    <a href="{% url 'language_list' %}"><button>Go to Languages</button></a>
+    {% else %}
+    <p style="opacity: 0.5; margin-bottom: 2rem; font-size: 13px;">The hardware exists. Your task is to program it.</p>
+    <ul>
+        {% for system in systems %}
+        <li style="margin-bottom: 1rem;">
+            <a href="{% url 'hardware_detail' system.slug %}" style="font-size: 1rem;">
+                &gt; {{ system.name }}
+            </a>
+            <p style="opacity: 0.4; font-size: 13px; margin-top: 2px;">{{ system.description|truncatewords:15 }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

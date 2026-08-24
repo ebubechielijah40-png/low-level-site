@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="container" style="max-width: 400px; padding-top: 4rem;">
+    <h2 style="margin-bottom: 2rem;">Sign In</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <p style="color: #ff4444; margin-bottom: 1rem;">{{ form.non_field_errors }}</p>
+        {% endif %}
+        <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">USERNAME</label>
+            <input type="text" name="username" autofocus>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">PASSWORD</label>
+            <input type="password" name="password">
+        </div>
+        <button type="submit">Sign In</button>
+    </form>
+    <p style="margin-top: 1rem; font-size: 13px; opacity: 0.6;">
+        No account? <a href="{% url 'register' %}">Get Started</a>
+    </p>
+</div>
+{% endblock %}
