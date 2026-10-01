@@ -1,18 +1,5 @@
-{% extends 'core/base.html' %}
-{% block content %}
-<div class="container">
-    <h1>{{ language.name }}</h1>
-    <p style="opacity: 0.7; margin-bottom: 2rem;">{{ language.description }}</p>
-    <h3 style="margin-bottom: 1rem;">Lessons</h3>
-    <ul>
-        {% for lesson in lessons %}
-        <li style="margin-bottom: 0.5rem;">
-            <a href="{% url 'lesson_detail' language.pk lesson.order %}">
-                {% if lesson.pk in completed_ids %}[&#10003;]{% else %}[ ]{% endif %}
-                {{ lesson.order }}. {{ lesson.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+{% extends 'core/base.html' %}{% block title %}{{ language.name }} — Bare Metal{% endblock %}{% block breadcrumb %}learning-path / {{ language.slug }}{% endblock %}{% block content %}
+<a class="back-link" href="{% url 'language_list' %}">← Learning path</a><div class="page-heading"><div><span class="eyebrow">LAYER {{ language.order|stringformat:'02d' }} / {{ language.subtitle|upper }}</span><h1>{{ language.name }}</h1><p class="max-copy">{{ language.description }}</p></div><a class="button outline" href="{% url 'playground' %}?lang={{ language.engine }}">Open terminal &gt;_</a></div>
+<div class="lesson-index">{% for lesson in lessons %}<a href="{% url 'lesson_detail' lesson.pk %}"><span class="lesson-number">{{ lesson.order|stringformat:'02d' }}</span><div><h3>{{ lesson.title }}</h3><p>{{ lesson.summary }}</p></div><span class="lesson-time">{{ lesson.minutes }} MIN</span><span class="lesson-state {% if lesson.pk in completed_ids %}done{% endif %}">{% if lesson.pk in completed_ids %}✓{% else %}↗{% endif %}</span></a>{% empty %}<p>No lessons have been loaded yet.</p>{% endfor %}</div>
+{% if configurations %}<div class="section-heading"><div><span class="eyebrow">APPLY THIS LAYER</span><h2>Related hardware configurations</h2></div></div><div class="system-strip">{% for lab in configurations %}<a href="{% url 'hardware_challenge' lab.system.slug lab.pk %}"><svg><use href="#i-chip"/></svg><span>{{ lab.title }}<small>{{ lab.system.name }}</small></span>↗</a>{% endfor %}</div>{% endif %}
 {% endblock %}

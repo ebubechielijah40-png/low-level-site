@@ -1,1 +1,24 @@
-.aider*
+env/
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+*.log
+.venv/
+venv/
+.pytest_cache/
+.env
+staticfiles/
+build/*.o
+evidence/browser/
+node_modules/
+package-lock.json
+
+# Local editor settings and generated outputs
+.vscode/
+build/
+output/
+MANIFEST.json
+
+# Local continuity notes
+docs/PROJECT_MEMORY.md

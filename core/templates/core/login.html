@@ -1,24 +1,3 @@
-{% extends 'core/base.html' %}
-{% block content %}
-<div class="container" style="max-width: 400px; padding-top: 4rem;">
-    <h2 style="margin-bottom: 2rem;">Sign In</h2>
-    <form method="POST">
-        {% csrf_token %}
-        {% if form.non_field_errors %}
-            <p style="color: #ff4444; margin-bottom: 1rem;">{{ form.non_field_errors }}</p>
-        {% endif %}
-        <div style="margin-bottom: 1rem;">
-            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">USERNAME</label>
-            <input type="text" name="username" autofocus>
-        </div>
-        <div style="margin-bottom: 1.5rem;">
-            <label style="display: block; margin-bottom: 4px; font-size: 12px; opacity: 0.6;">PASSWORD</label>
-            <input type="password" name="password">
-        </div>
-        <button type="submit">Sign In</button>
-    </form>
-    <p style="margin-top: 1rem; font-size: 13px; opacity: 0.6;">
-        No account? <a href="{% url 'register' %}">Get Started</a>
-    </p>
-</div>
+{% extends 'core/base.html' %}{% block title %}Sign in — Bare Metal{% endblock %}{% block page_class %}auth-page{% endblock %}{% block content %}
+<div class="auth-layout"><section class="auth-story"><span class="eyebrow">RESUME YOUR SESSION</span><h1>Back to<br>the <span class="accent">machine.</span></h1><p>Your explanations, code drafts, and<br>experiments share one workspace.</p><div class="auth-chip" aria-hidden="true"><svg><use href="#i-chip"/></svg><span>01000010<br>01001101</span></div><div class="auth-foot"><span class="dot"></span> THE TERMINAL IS READY</div></section><section class="auth-card"><div class="eyebrow">AUTHENTICATE / 01</div><h2>Sign in</h2><p class="muted">Continue where you left your code.</p><form method="post" novalidate>{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">{% include 'core/form_fields.html' %}<button class="button primary full" type="submit">Open workspace <span>→</span></button></form><p class="auth-switch">New here? <a href="{% url 'register' %}">Create a workspace ↗</a></p></section></div>
 {% endblock %}

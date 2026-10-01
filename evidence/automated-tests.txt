@@ -1,0 +1,13 @@
+Creating test database for alias 'default'...
+...................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 163 tests in 3.220s
+
+OK
+Destroying test database for alias 'default'...
+Found 163 test(s).
+System check identified no issues (0 silenced).
+Seeded 6 tracks and 33 lessons.
+Seeded 6 component models and 13 configuration labs.
+Seeded 6 tracks and 33 lessons.
+Seeded 6 component models and 13 configuration labs.

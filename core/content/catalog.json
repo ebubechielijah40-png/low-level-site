@@ -1,0 +1,640 @@
+[
+  {
+    "name": "Machine code",
+    "slug": "machine",
+    "engine": "machine",
+    "subtitle": "Bits become instructions",
+    "description": "Start at representation, decode real RV32I words, and observe what a processor actually changes. No prior programming is assumed.",
+    "lessons": [
+      {
+        "title": "Bits, bytes, and a machine state",
+        "summary": "Learn what a bit means before asking the processor to do anything.",
+        "file": "machine-01.md",
+        "starter_code": "00500293\n00000073\n",
+        "example_output": "",
+        "expected_state": {
+          "registers": {
+            "x5": 5
+          }
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Decode an instruction field by field",
+        "summary": "Derive an ADDI encoding instead of treating hexadecimal as magic.",
+        "file": "machine-02.md",
+        "starter_code": "00700293\n00328293\n00000073\n",
+        "example_output": "",
+        "expected_state": {
+          "registers": {
+            "x5": 10
+          }
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Words, byte order, and addresses",
+        "summary": "Separate the way a word is displayed from the order its bytes occupy memory.",
+        "file": "machine-03.md",
+        "starter_code": "02a00293\n00100313\n006283b3\n00000073\n",
+        "example_output": "",
+        "expected_state": {
+          "registers": {
+            "x7": 43
+          }
+        },
+        "minutes": 30
+      },
+      {
+        "title": "The arithmetic logic unit",
+        "summary": "Inspect what arithmetic changes and what remains untouched.",
+        "file": "machine-04.md",
+        "starter_code": "01400293\n00700313\n006283b3\n40628433\n00000073\n",
+        "example_output": "",
+        "expected_state": {
+          "registers": {
+            "x7": 27,
+            "x8": 13
+          }
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Load, store, and a memory bus",
+        "summary": "Move a value through RAM and learn why addresses need bounds.",
+        "file": "machine-05.md",
+        "starter_code": "000022b7\n02a00313\n0062a023\n0002a503\n00000073\n",
+        "example_output": "",
+        "expected_state": {
+          "registers": {
+            "x10": 42
+          }
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Control flow is a change of address",
+        "summary": "Decode a loop and make its stopping condition explicit.",
+        "file": "machine-06.md",
+        "starter_code": "00500293\n00000313\n00530333\nfff28293\nfe029ce3\n00030513\n00100893\n00000073\n00a00893\n00000073\n",
+        "example_output": "15",
+        "expected_state": {
+          "output": "15"
+        },
+        "minutes": 40
+      }
+    ]
+  },
+  {
+    "name": "Assembly",
+    "slug": "assembly",
+    "engine": "assembly",
+    "subtitle": "Name the instructions",
+    "description": "Write RV32I mnemonics, inspect their real encoded words, and connect branches, memory, and calls to the machine-code track.",
+    "lessons": [
+      {
+        "title": "Symbols, registers, and the assembler",
+        "summary": "Use names to express the same state transitions you already decoded.",
+        "file": "assembly-01.md",
+        "starter_code": "li t0,21\nadd t1,t0,t0\nmv a0,t1\nli a7,1\necall\nli a7,10\necall\n",
+        "example_output": "42",
+        "expected_state": {
+          "output": "42"
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Signed values and bit masks",
+        "summary": "Choose the interpretation an operation needs.",
+        "file": "assembly-02.md",
+        "starter_code": "li t0,3\nori t1,t0,4\nandi t1,t1,-3\nmv a0,t1\nli a7,1\necall\nli a7,10\necall\n",
+        "example_output": "5",
+        "expected_state": {
+          "output": "5"
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Branches, labels, and loop invariants",
+        "summary": "Explain why a loop works rather than merely observing that it stops.",
+        "file": "assembly-03.md",
+        "starter_code": "li t0,1\nli t1,6\nli t2,0\nloop:\nadd t2,t2,t0\naddi t0,t0,1\nblt t0,t1,loop\nmv a0,t2\nli a7,1\necall\nli a7,10\necall\n",
+        "example_output": "15",
+        "expected_state": {
+          "output": "15"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Arrays and load/store addressing",
+        "summary": "Derive an element address from a base, an index, and an element size.",
+        "file": "assembly-04.md",
+        "starter_code": ".data\nnumbers: .word 4,8,12,16\n.text\nla t0,numbers\nli t1,4\nli t2,0\nloop:\nlw t3,0(t0)\nadd t2,t2,t3\naddi t0,t0,4\naddi t1,t1,-1\nbne t1,zero,loop\nmv a0,t2\nli a7,1\necall\nli a7,10\necall\n",
+        "example_output": "40",
+        "expected_state": {
+          "output": "40"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Calls, returns, and the stack",
+        "summary": "Make a function call visible as a jump plus a return-address agreement.",
+        "file": "assembly-05.md",
+        "starter_code": "li a0,21\ncall double_value\nli a7,1\necall\nli a7,10\necall\ndouble_value:\naddi sp,sp,-16\nsw ra,12(sp)\ncall helper\nlw ra,12(sp)\naddi sp,sp,16\nret\nhelper:\nadd a0,a0,a0\nret\n",
+        "example_output": "42",
+        "expected_state": {
+          "output": "42",
+          "registers": {
+            "x2": 57344
+          }
+        },
+        "minutes": 40
+      },
+      {
+        "title": "Memory-mapped device registers",
+        "summary": "Treat device configuration as a documented interface, not a magic address.",
+        "file": "assembly-06.md",
+        "starter_code": "lui t0,15\nli t1,512\nsw t1,0(t0)\nli t1,1\nsw t1,4(t0)\nlw a0,4(t0)\nli a7,1\necall\nli a7,10\necall\n",
+        "example_output": "1",
+        "expected_state": {
+          "mmio": {
+            "61440": 512,
+            "61444": 1
+          },
+          "output": "1"
+        },
+        "minutes": 35
+      }
+    ]
+  },
+  {
+    "name": "C",
+    "slug": "c",
+    "engine": "c",
+    "subtitle": "Control storage and layout",
+    "description": "Move from instructions to functions, pointers, arrays, structures, and explicit device interfaces. Learn C with a documented bounded ILP32 interpreter.",
+    "lessons": [
+      {
+        "title": "From source text to an execution model",
+        "summary": "Understand the C entry point, declarations, and the limits of the embedded runner.",
+        "file": "c-01.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    printf(\"Hello, machine.\\n\");\n    return 0;\n}\n",
+        "example_output": "Hello, machine.\n",
+        "expected_state": {
+          "output": "Hello, machine."
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Integer widths, conversion, and flags",
+        "summary": "Make overflow and bit operations explicit instead of relying on accidental results.",
+        "file": "c-02.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    unsigned int flags = 0U;\n    flags = flags | 1U | 4U;\n    printf(\"flags=%u enabled=%d\\n\", flags, (flags & 4U) != 0);\n    return 0;\n}\n",
+        "example_output": "flags=5 enabled=1\n",
+        "expected_state": {
+          "output": "flags=5 enabled=1"
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Branches, loops, and a correctness argument",
+        "summary": "Use a condition, an invariant, and a bound to explain an algorithm.",
+        "file": "c-03.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    int n = 5;\n    int sum = 0;\n    for (int i = 1; i <= n; i++) {\n        sum += i;\n    }\n    printf(\"sum=%d\\n\", sum);\n    return 0;\n}\n",
+        "example_output": "sum=15\n",
+        "expected_state": {
+          "output": "sum=15"
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Arrays, sizes, and boundary errors",
+        "summary": "Translate an index into a storage location and test the bounds deliberately.",
+        "file": "c-04.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    int values[4] = {4, 8, 12, 16};\n    int length = sizeof(values) / sizeof(int);\n    int sum = 0;\n    for (int i = 0; i < length; i++) {\n        sum += values[i];\n    }\n    printf(\"length=%d sum=%d\\n\", length, sum);\n    return 0;\n}\n",
+        "example_output": "length=4 sum=40\n",
+        "expected_state": {
+          "output": "length=4 sum=40"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Pointers and indirection",
+        "summary": "Distinguish an object, a reference to it, and the value reached through that reference.",
+        "file": "c-05.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    int value = 21;\n    int *p = &value;\n    *p = *p + 21;\n    printf(\"value=%d through_pointer=%d\\n\", value, *p);\n    return 0;\n}\n",
+        "example_output": "value=42 through_pointer=42\n",
+        "expected_state": {
+          "output": "value=42 through_pointer=42"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Functions, parameters, and local frames",
+        "summary": "Connect a C call to the control-flow and storage protocol beneath it.",
+        "file": "c-06.md",
+        "starter_code": "#include <stdio.h>\nint sum_to(int n) {\n    int sum = 0;\n    for (int i = 1; i <= n; i++) {\n        sum += i;\n    }\n    return sum;\n}\nint main(void) {\n    int first = sum_to(5);\n    int second = sum_to(10);\n    printf(\"first=%d second=%d\\n\", first, second);\n    return 0;\n}\n",
+        "example_output": "first=15 second=55\n",
+        "expected_state": {
+          "output": "first=15 second=55"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Structures and explicit data contracts",
+        "summary": "Group related fields while keeping representation assumptions visible.",
+        "file": "c-07.md",
+        "starter_code": "#include <stdio.h>\nstruct RamConfig {\n    int capacity_mib;\n    int enabled;\n    int parity;\n};\nint main(void) {\n    struct RamConfig config;\n    config.capacity_mib = 512;\n    config.enabled = 1;\n    config.parity = 1;\n    int valid = config.capacity_mib >= 256 && config.enabled == 1;\n    printf(\"capacity=%d valid=%d\\n\", config.capacity_mib, valid);\n    return 0;\n}\n",
+        "example_output": "capacity=512 valid=1\n",
+        "expected_state": {
+          "output": "capacity=512 valid=1"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Volatile, MMIO, and configuration order",
+        "summary": "Connect a language-level interface to a documented virtual device.",
+        "file": "c-08.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512);\n    mmio_write(0xF004, 1);\n    mmio_write(0xF008, 1);\n    printf(\"capacity=%u enabled=%u parity=%u\\n\", mmio_read(0xF000), mmio_read(0xF004), mmio_read(0xF008));\n    return 0;\n}\n",
+        "example_output": "capacity=512 enabled=1 parity=1\n",
+        "expected_state": {
+          "mmio": {
+            "61440": 512,
+            "61444": 1,
+            "61448": 1
+          },
+          "output": "capacity=512 enabled=1 parity=1"
+        },
+        "minutes": 40
+      }
+    ]
+  },
+  {
+    "name": "Rust",
+    "slug": "rust",
+    "engine": "rust",
+    "subtitle": "Make ownership explicit",
+    "description": "A focused systems-language bridge: integer computation, immutability, arrays, functions, and exclusive mutable access. The embedded runner is a teaching subset, not rustc.",
+    "lessons": [
+      {
+        "title": "Bindings, mutability, and integer intent",
+        "summary": "Make permission to change a value part of its declaration.",
+        "file": "rust-01.md",
+        "starter_code": "fn main() {\n    let mut value: i32 = 21;\n    value = value * 2;\n    println!(\"value={}\", value);\n}\n",
+        "example_output": "value=42\n",
+        "expected_state": {
+          "output": "value=42"
+        },
+        "minutes": 30
+      },
+      {
+        "title": "Expressions, functions, and ranges",
+        "summary": "Express a bounded calculation while keeping the visited values clear.",
+        "file": "rust-02.md",
+        "starter_code": "fn sum_to(n: i32) -> i32 {\n    let mut total: i32 = 0;\n    for i in 1..=n {\n        total += i;\n    }\n    total\n}\nfn main() {\n    let answer: i32 = sum_to(5);\n    println!(\"sum={}\", answer);\n}\n",
+        "example_output": "sum=15\n",
+        "expected_state": {
+          "output": "sum=15"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Borrowing and exclusive write access",
+        "summary": "See why aliases need an access policy, not just an address.",
+        "file": "rust-03.md",
+        "starter_code": "fn main() {\n    let mut value: i32 = 21;\n    {\n        let pointer = &mut value;\n        *pointer = *pointer + 21;\n    }\n    println!(\"value={}\", value);\n}\n",
+        "example_output": "value=42\n",
+        "expected_state": {
+          "output": "value=42"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Arrays and bounded buffers",
+        "summary": "Use a compact systems-language exercise to reason about data boundaries.",
+        "file": "rust-04.md",
+        "starter_code": "fn main() {\n    let values = [4, 8, 12, 16];\n    let mut total: i32 = 0;\n    for i in 0..4 {\n        total += values[i];\n    }\n    println!(\"sum={}\", total);\n}\n",
+        "example_output": "sum=40\n",
+        "expected_state": {
+          "output": "sum=40"
+        },
+        "minutes": 35
+      }
+    ]
+  },
+  {
+    "name": "Verilog",
+    "slug": "verilog",
+    "engine": "verilog",
+    "subtitle": "Describe the logic itself",
+    "description": "Learn a focused hardware-description language through gates, adders, multiplexers, and exhaustive combinational tests. Simulation is distinct from synthesis or programming an FPGA.",
+    "lessons": [
+      {
+        "title": "Signals, gates, and continuous assignment",
+        "summary": "Describe a circuit rather than a sequential software procedure.",
+        "file": "verilog-01.md",
+        "starter_code": "module gate(input a, input b, output y);\n    assign y = a & b;\nendmodule\n",
+        "example_output": "a | b | y\n0 | 0 | 0\n1 | 0 | 0\n0 | 1 | 0\n1 | 1 | 1\n",
+        "expected_state": {
+          "truth_table": [
+            {
+              "a": 0,
+              "b": 0,
+              "y": 0
+            },
+            {
+              "a": 1,
+              "b": 0,
+              "y": 0
+            },
+            {
+              "a": 0,
+              "b": 1,
+              "y": 0
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "y": 1
+            }
+          ]
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Build a half adder",
+        "summary": "Derive one arithmetic circuit from a sum bit and a carry bit.",
+        "file": "verilog-02.md",
+        "starter_code": "module half_adder(input a, input b, output sum, output carry);\n    assign sum = a ^ b;\n    assign carry = a & b;\nendmodule\n",
+        "example_output": "",
+        "expected_state": {
+          "truth_table": [
+            {
+              "a": 0,
+              "b": 0,
+              "sum": 0,
+              "carry": 0
+            },
+            {
+              "a": 1,
+              "b": 0,
+              "sum": 1,
+              "carry": 0
+            },
+            {
+              "a": 0,
+              "b": 1,
+              "sum": 1,
+              "carry": 0
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "sum": 0,
+              "carry": 1
+            }
+          ]
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Multiplexers and a datapath decision",
+        "summary": "Select one source without pretending the unselected input disappears.",
+        "file": "verilog-03.md",
+        "starter_code": "module mux(input a, input b, input select, output y);\n    assign y = select ? b : a;\nendmodule\n",
+        "example_output": "",
+        "expected_state": {
+          "truth_table": [
+            {
+              "a": 0,
+              "b": 0,
+              "select": 0,
+              "y": 0
+            },
+            {
+              "a": 1,
+              "b": 0,
+              "select": 0,
+              "y": 1
+            },
+            {
+              "a": 0,
+              "b": 1,
+              "select": 0,
+              "y": 0
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "select": 0,
+              "y": 1
+            },
+            {
+              "a": 0,
+              "b": 0,
+              "select": 1,
+              "y": 0
+            },
+            {
+              "a": 1,
+              "b": 0,
+              "select": 1,
+              "y": 0
+            },
+            {
+              "a": 0,
+              "b": 1,
+              "select": 1,
+              "y": 1
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "select": 1,
+              "y": 1
+            }
+          ]
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Buses, comparators, and width discipline",
+        "summary": "Treat a signal width as a precise part of the circuit contract.",
+        "file": "verilog-04.md",
+        "starter_code": "module compare(input [1:0] a, input [1:0] b, output equal, output less);\n    assign equal = a == b;\n    assign less = a < b;\nendmodule\n",
+        "example_output": "",
+        "expected_state": {
+          "truth_table": [
+            {
+              "a": 0,
+              "b": 0,
+              "equal": 1,
+              "less": 0
+            },
+            {
+              "a": 1,
+              "b": 0,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 2,
+              "b": 0,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 3,
+              "b": 0,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 0,
+              "b": 1,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 1,
+              "b": 1,
+              "equal": 1,
+              "less": 0
+            },
+            {
+              "a": 2,
+              "b": 1,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 3,
+              "b": 1,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 0,
+              "b": 2,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 1,
+              "b": 2,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 2,
+              "b": 2,
+              "equal": 1,
+              "less": 0
+            },
+            {
+              "a": 3,
+              "b": 2,
+              "equal": 0,
+              "less": 0
+            },
+            {
+              "a": 0,
+              "b": 3,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 1,
+              "b": 3,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 2,
+              "b": 3,
+              "equal": 0,
+              "less": 1
+            },
+            {
+              "a": 3,
+              "b": 3,
+              "equal": 1,
+              "less": 0
+            }
+          ]
+        },
+        "minutes": 35
+      }
+    ]
+  },
+  {
+    "name": "Operating systems",
+    "slug": "os",
+    "engine": "boot",
+    "subtitle": "From reset to your own code",
+    "description": "Build and host a real 512-byte x86 BIOS boot image in your workspace, inspect execution, and progress toward the included freestanding C kernel. No lesson locks.",
+    "lessons": [
+      {
+        "title": "Reset, firmware, and the first sector",
+        "summary": "Establish who loads the first code before an operating system exists.",
+        "file": "os-01.md",
+        "starter_code": "bits 16\norg 0x7c00\nmov ah,0x0e\nmov al,66\nint 0x10\nhlt\n",
+        "example_output": "B",
+        "expected_state": {
+          "output": "B"
+        },
+        "minutes": 35
+      },
+      {
+        "title": "Strings, pointers, and a boot screen",
+        "summary": "Walk a zero-terminated byte sequence before a C runtime exists.",
+        "file": "os-02.md",
+        "starter_code": "bits 16\norg 0x7c00\nstart:\n    xor ax, ax\n    mov ds, ax\n    mov si, message\n    mov ah, 0x0e\nprint:\n    lodsb\n    cmp al, 0\n    je done\n    int 0x10\n    jmp print\ndone:\n    hlt\nmessage:\n    db \"BARE METAL OS\", 13, 10, \"Booted from your own 512-byte image.\", 13, 10, 0\n",
+        "example_output": "BARE METAL OS\nBooted from your own 512-byte image.\n",
+        "expected_state": {
+          "contains": "BARE METAL OS"
+        },
+        "minutes": 40
+      },
+      {
+        "title": "A stack and a reusable boot routine",
+        "summary": "Replace duplicated output code with a call that preserves its return path.",
+        "file": "os-03.md",
+        "starter_code": "bits 16\norg 0x7c00\nxor ax,ax\nmov ds,ax\nmov si,message\ncall print_string\nhlt\nprint_string:\nmov ah,0x0e\nagain:\nlodsb\ncmp al,0\nje finished\nint 0x10\njmp again\nfinished:\nret\nmessage:\ndb \"CALL/RETURN OK\",0\n",
+        "example_output": "CALL/RETURN OK",
+        "expected_state": {
+          "output": "CALL/RETURN OK",
+          "registers": {
+            "sp": 31744
+          }
+        },
+        "minutes": 40
+      },
+      {
+        "title": "A counter, an output device, and a bounded run",
+        "summary": "Use processor state to generate visible behaviour instead of replaying a picture.",
+        "file": "os-04.md",
+        "starter_code": "bits 16\norg 0x7c00\nmov cx,10\nmov ah,0x0e\nmov al,48\nagain:\nint 0x10\ninc ax\nloop again\nhlt\n",
+        "example_output": "0123456789",
+        "expected_state": {
+          "output": "0123456789",
+          "registers": {
+            "cx": 0
+          }
+        },
+        "minutes": 40
+      },
+      {
+        "title": "From a boot sector to a freestanding kernel",
+        "summary": "Know which responsibilities remain after the first successful screen.",
+        "file": "os-05.md",
+        "starter_code": "bits 16\norg 0x7c00\nmov ah,0x0e\nmov si,message\nagain:\nlodsb\ncmp al,0\nje done\nint 0x10\njmp again\ndone:\nhlt\nmessage:\ndb \"Stage zero ready. Next: freestanding kernel.\",0\n",
+        "example_output": "Stage zero ready. Next: freestanding kernel.",
+        "expected_state": {
+          "contains": "Stage zero ready."
+        },
+        "minutes": 45
+      }
+    ]
+  }
+]

@@ -1,0 +1,3 @@
+Seeded 6 tracks and 33 lessons.
+Seeded 6 component models and 13 configuration labs.
+HTTP smoke PASS: registration, session cookies, CSRF, dashboard, execution, hardware checks, boot save/download/run.

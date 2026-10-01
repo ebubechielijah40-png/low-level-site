@@ -1,30 +1,6 @@
-{% extends 'core/base.html' %}
-{% block content %}
-<div class="container" style="padding-top: 4rem;">
-    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Computer Languages</h1>
-    <p style="color: #aaa; max-width: 500px; margin-bottom: 2rem;">
-        Documentation, examples, and interactive practice for C, Assembly, and Machine Language.
-        For those who want to understand how computers actually work.
-    </p>
-    <div style="display: flex; gap: 4rem; margin-bottom: 3rem;">
-        <div>
-            <p>&#10003; &nbsp; Structured lessons</p>
-            <p>&#10003; &nbsp; Interactive editor</p>
-            <p>&#10003; &nbsp; Real code execution</p>
-        </div>
-        <div>
-            <p>&#10003; &nbsp; Progress tracking</p>
-            <p>&#10003; &nbsp; Hardware challenges</p>
-            <p>&#10003; &nbsp; C and Assembly</p>
-        </div>
-    </div>
-    <div style="display: flex; gap: 1rem; align-items: center;">
-        {% if user.is_authenticated %}
-            <a href="{% url 'language_list' %}"><button>Continue Learning</button></a>
-        {% else %}
-            <a href="{% url 'register' %}"><button>Get Started</button></a>
-            <a href="{% url 'login' %}" style="font-size: 13px; opacity: 0.6;">Sign In</a>
-        {% endif %}
-    </div>
-</div>
+{% extends 'core/base.html' %}{% block title %}Bare Metal — Understand what runs{% endblock %}{% block page_class %}landing-page{% endblock %}{% block content %}
+<div class="hero"><div><div class="eyebrow"><span class="dot"></span> FROM BITS TO SYSTEMS</div><h1>Know what<br>runs <span class="accent">beneath.</span></h1><p class="hero-copy">Learn the languages that shape a machine.<br>Read the explanation. Write the code. Inspect what changes.</p><div class="hero-actions"><a class="button primary" href="{% url 'register' %}">Start at the first bit <svg><use href="#i-arrow"/></svg></a><a class="text-link" href="{% url 'login' %}">Return to your workspace ↗</a></div><div class="hero-foot">01 MACHINE CODE <span>→</span> 02 ASSEMBLY <span>→</span> 03 C</div></div><div class="hero-machine"><div class="panel-title"><span>MODEL / PERSONAL COMPUTER</span><span class="accent">LIVE VIEW</span></div><canvas class="hardware-model" data-system="pc" aria-label="Interactive conceptual motherboard. Drag to rotate and scroll to zoom." tabindex="0"></canvas><div class="model-caption">DRAG TO ORBIT <span>SCROLL TO ZOOM</span></div><div class="hero-terminal"><span class="muted">guest@bare-metal:~$</span> inspect machine<br><span class="accent">[ready]</span> instructions · memory · control</div></div></div>
+<div class="section-heading"><div><span class="eyebrow">ONE WORKSPACE</span><h2>Understanding stays beside the experiment.</h2></div><span class="index-label">NO EXTERNAL RUNNER</span></div>
+<div class="feature-row"><article><span class="index-label">01 / LEARN</span><h3>Follow a precise path.</h3><p>Machine code, assembly, C, Rust, Verilog, and the first steps of an operating system. Explanations, worked examples, and deliberate failure tests.</p></article><article><span class="index-label">02 / APPLY</span><h3>Keep your terminal open.</h3><p>Edit beside the documentation. Run supported code, inspect registers and memory, and test the expected result without leaving the lesson.</p></article><article><span class="index-label">03 / INSPECT</span><h3>See the component.</h3><p>Select a part in a model, configure its virtual interface, and inspect the resulting state. Every model states its simulation boundaries.</p></article></div>
+<footer class="public-footer"><span>BARE/METAL</span><span>A machine has no magic. Find the mechanism.</span></footer>
 {% endblock %}

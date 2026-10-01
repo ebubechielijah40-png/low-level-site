@@ -1,19 +1,4 @@
-{% extends 'core/base.html' %}
-{% block content %}
-<div class="container">
-    <a href="{% url 'hardware_list' %}" style="font-size: 12px; opacity: 0.5;">&larr; Hardware</a>
-    <h1 style="margin-top: 1rem;">{{ system.name }}</h1>
-    <p style="opacity: 0.6; margin-bottom: 2rem;">{{ system.description }}</p>
-    <h3 style="margin-bottom: 1rem;">Challenges</h3>
-    <ul>
-        {% for challenge in challenges %}
-        <li style="margin-bottom: 0.75rem;">
-            <a href="{% url 'hardware_challenge' system.slug challenge.pk %}">
-                {% if challenge.pk in completed_ids %}[&#10003;]{% else %}[ ]{% endif %}
-                {{ challenge.order }}. {{ challenge.title }}
-            </a>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+{% extends 'core/base.html' %}{% block title %}{{ system.name }} — Bare Metal{% endblock %}{% block breadcrumb %}hardware / {{ system.slug }}{% endblock %}{% block content %}
+<a class="back-link" href="{% url 'hardware_list' %}">← Hardware configuration</a><div class="page-heading"><div><span class="eyebrow">{{ system.category|upper }} / OPEN CONFIGURATION</span><h1>{{ system.name }}</h1><p class="max-copy">{{ system.description }}</p></div></div>
+<div class="hardware-detail-grid"><div>{% include 'core/model.html' %}<div class="callout"><h3>A component model with explicit limits.</h3><p>Select a component to see its role. Use a configuration below to write virtual registers and inspect state beside the model. These views do not control physical equipment.</p></div></div><div class="configuration-list"><span class="eyebrow">COMPONENT CONFIGURATIONS</span>{% for lab in challenges %}<a class="configuration-item" href="{% url 'hardware_challenge' system.slug lab.pk %}" data-component-link="{{ lab.component }}"><span class="lesson-number">{{ lab.order|stringformat:'02d' }}</span><div><span class="index-label">{{ lab.component|upper }}</span><h3>{{ lab.title }}</h3><p>{{ lab.description }}</p><small>{% if lab.language %}Connects to {{ lab.language.name }}{% endif %}</small></div><span class="accent">{% if lab.pk in completed_ids %}✓{% else %}↗{% endif %}</span></a>{% endfor %}</div></div>
 {% endblock %}

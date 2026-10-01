@@ -1,0 +1,544 @@
+[
+  {
+    "slug": "pc",
+    "name": "Personal computer",
+    "category": "Foundation",
+    "description": "A component-level motherboard model: inspect the CPU, memory, storage, and I/O path while configuring a virtual machine.",
+    "labs": [
+      {
+        "title": "CPU execution budget",
+        "description": "A CPU executes instructions while caches and memory supply their data.",
+        "component": "cpu",
+        "language_slug": "assembly",
+        "file": "pc-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 4); // cores\n    mmio_write(0xF004, 2400); // clock_mhz\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,4\nsw t1,0(t0)\nli t1,2400\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 4,
+            "61444": 2400,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 4); // cores\n    mmio_write(0xF004, 2400); // clock_mhz\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,4\nsw t1,0(t0)\nli t1,2400\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "cores",
+            "target": 4,
+            "meaning": "Virtual execution cores"
+          },
+          {
+            "address": 61444,
+            "name": "clock_mhz",
+            "target": 2400,
+            "meaning": "Illustrative requested clock in MHz"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 requests enabled state"
+          }
+        ]
+      },
+      {
+        "title": "RAM capacity and parity mode",
+        "description": "RAM stores the working data a processor can access.",
+        "component": "ram",
+        "language_slug": "c",
+        "file": "pc-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512); // capacity_mib\n    mmio_write(0xF004, 1); // enabled\n    mmio_write(0xF008, 0); // parity\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,512\nsw t1,0(t0)\nli t1,1\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 512,
+            "61444": 1,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512); // capacity_mib\n    mmio_write(0xF004, 1); // enabled\n    mmio_write(0xF008, 1); // parity\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,512\nsw t1,0(t0)\nli t1,1\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "capacity_mib",
+            "target": 512,
+            "meaning": "Requested virtual memory capacity in MiB"
+          },
+          {
+            "address": 61444,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 makes the model available"
+          },
+          {
+            "address": 61448,
+            "name": "parity",
+            "target": 1,
+            "meaning": "1 requests the model parity flag"
+          }
+        ]
+      },
+      {
+        "title": "A block-device transfer profile",
+        "description": "A block device presents fixed-size chunks addressed by block number.",
+        "component": "storage",
+        "language_slug": "os",
+        "file": "pc-03.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512); // block_bytes\n    mmio_write(0xF004, 4); // queue_depth\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,512\nsw t1,0(t0)\nli t1,4\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 512,
+            "61444": 4,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512); // block_bytes\n    mmio_write(0xF004, 4); // queue_depth\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,512\nsw t1,0(t0)\nli t1,4\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "block_bytes",
+            "target": 512,
+            "meaning": "Bytes per simulated block"
+          },
+          {
+            "address": 61444,
+            "name": "queue_depth",
+            "target": 4,
+            "meaning": "Concurrent requests allowed in the profile"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables the virtual block interface"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "server",
+    "name": "Server",
+    "category": "Deployment",
+    "description": "Inspect a rack server, configure its virtual worker and network interfaces, and test the state beside the model.",
+    "labs": [
+      {
+        "title": "Bounded worker capacity",
+        "description": "A server accepts work under finite CPU, memory, and I/O capacity.",
+        "component": "cpu",
+        "language_slug": "rust",
+        "file": "server-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 8); // workers\n    mmio_write(0xF004, 64); // queue_limit\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,8\nsw t1,0(t0)\nli t1,64\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 8,
+            "61444": 64,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 8); // workers\n    mmio_write(0xF004, 64); // queue_limit\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,8\nsw t1,0(t0)\nli t1,64\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "workers",
+            "target": 8,
+            "meaning": "Maximum active workers in the teaching profile"
+          },
+          {
+            "address": 61444,
+            "name": "queue_limit",
+            "target": 64,
+            "meaning": "Maximum queued work items"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables intake"
+          }
+        ]
+      },
+      {
+        "title": "Network interface policy",
+        "description": "A network interface moves frames while protocol stacks interpret them and applications handle messages.",
+        "component": "network",
+        "language_slug": "c",
+        "file": "server-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 1500); // mtu_bytes\n    mmio_write(0xF004, 32); // connections\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,1500\nsw t1,0(t0)\nli t1,32\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 1500,
+            "61444": 32,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 1500); // mtu_bytes\n    mmio_write(0xF004, 32); // connections\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,1500\nsw t1,0(t0)\nli t1,32\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "mtu_bytes",
+            "target": 1500,
+            "meaning": "Illustrative maximum transmission unit"
+          },
+          {
+            "address": 61444,
+            "name": "connections",
+            "target": 32,
+            "meaning": "Virtual connection capacity"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables the interface profile"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "data-center",
+    "name": "Data centre",
+    "category": "Infrastructure",
+    "description": "Orbit around racks, cooling, and a fabric model. Configure resource and failure-policy requests with explicit simulation boundaries.",
+    "labs": [
+      {
+        "title": "Replication across nodes",
+        "description": "A data centre combines compute, storage, networks, power, and cooling.",
+        "component": "racks",
+        "language_slug": "rust",
+        "file": "data-center-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 6); // nodes\n    mmio_write(0xF004, 3); // replicas\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,6\nsw t1,0(t0)\nli t1,3\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 6,
+            "61444": 3,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 6); // nodes\n    mmio_write(0xF004, 3); // replicas\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,6\nsw t1,0(t0)\nli t1,3\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "nodes",
+            "target": 6,
+            "meaning": "Available virtual nodes"
+          },
+          {
+            "address": 61444,
+            "name": "replicas",
+            "target": 3,
+            "meaning": "Requested copies per object"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables placement policy"
+          }
+        ]
+      },
+      {
+        "title": "Cooling and a thermal policy",
+        "description": "Electrical work in computing equipment largely becomes heat.",
+        "component": "cooling",
+        "language_slug": "assembly",
+        "file": "data-center-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 6000); // power_watts\n    mmio_write(0xF004, 8000); // cooling_watts\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,6000\nsw t1,0(t0)\nli t1,8000\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 6000,
+            "61444": 8000,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 6000); // power_watts\n    mmio_write(0xF004, 8000); // cooling_watts\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,6000\nsw t1,0(t0)\nli t1,8000\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "power_watts",
+            "target": 6000,
+            "meaning": "Illustrative IT load estimate in watts"
+          },
+          {
+            "address": 61444,
+            "name": "cooling_watts",
+            "target": 8000,
+            "meaning": "Illustrative cooling-removal capacity"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables the model policy"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "supercomputer",
+    "name": "Compute cluster",
+    "category": "Parallel systems",
+    "description": "Select compute nodes and the interconnect. Compare configured resources with the limits of parallel work.",
+    "labs": [
+      {
+        "title": "Parallel compute profile",
+        "description": "A compute cluster distributes work across nodes.",
+        "component": "cpu",
+        "language_slug": "c",
+        "file": "supercomputer-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 16); // nodes\n    mmio_write(0xF004, 8); // workers_per_node\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,16\nsw t1,0(t0)\nli t1,8\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 16,
+            "61444": 8,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 16); // nodes\n    mmio_write(0xF004, 8); // workers_per_node\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,16\nsw t1,0(t0)\nli t1,8\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "nodes",
+            "target": 16,
+            "meaning": "Virtual compute-node count"
+          },
+          {
+            "address": 61444,
+            "name": "workers_per_node",
+            "target": 8,
+            "meaning": "Workers requested on each node"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables the allocation profile"
+          }
+        ]
+      },
+      {
+        "title": "Interconnect message contract",
+        "description": "Parallel nodes must exchange data.",
+        "component": "network",
+        "language_slug": "assembly",
+        "file": "supercomputer-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 4); // lanes\n    mmio_write(0xF004, 256); // message_bytes\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,4\nsw t1,0(t0)\nli t1,256\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 4,
+            "61444": 256,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 4); // lanes\n    mmio_write(0xF004, 256); // message_bytes\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,4\nsw t1,0(t0)\nli t1,256\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "lanes",
+            "target": 4,
+            "meaning": "Illustrative communication paths"
+          },
+          {
+            "address": 61444,
+            "name": "message_bytes",
+            "target": 256,
+            "meaning": "Bytes in the model transfer unit"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables fabric policy"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "satellite",
+    "name": "Satellite",
+    "category": "Embedded systems",
+    "description": "Inspect an onboard computer, solar panels, and antenna. Configure a simple telemetry and parity interface without real radio access.",
+    "labs": [
+      {
+        "title": "Telemetry packet policy",
+        "description": "A satellite computer collects measurements, timestamps them, packages telemetry, and coordinates communication under power and bandwidth constraints.",
+        "component": "cpu",
+        "language_slug": "c",
+        "file": "satellite-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 10); // sample_hz\n    mmio_write(0xF004, 32); // payload_bytes\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,10\nsw t1,0(t0)\nli t1,32\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 10,
+            "61444": 32,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 10); // sample_hz\n    mmio_write(0xF004, 32); // payload_bytes\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,10\nsw t1,0(t0)\nli t1,32\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "sample_hz",
+            "target": 10,
+            "meaning": "Requested samples per second"
+          },
+          {
+            "address": 61444,
+            "name": "payload_bytes",
+            "target": 32,
+            "meaning": "Bytes per virtual sample"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables telemetry policy"
+          }
+        ]
+      },
+      {
+        "title": "Packet parity and the antenna path",
+        "description": "An error-detection code adds redundant information so selected corruptions can be noticed.",
+        "component": "antenna",
+        "language_slug": "verilog",
+        "file": "satellite-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 85); // data_byte\n    mmio_write(0xF004, 0); // parity_bit\n    mmio_write(0xF008, 0); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,85\nsw t1,0(t0)\nli t1,0\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 85,
+            "61444": 0,
+            "61448": 1
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 85); // data_byte\n    mmio_write(0xF004, 0); // parity_bit\n    mmio_write(0xF008, 1); // enabled\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,85\nsw t1,0(t0)\nli t1,0\nsw t1,4(t0)\nli t1,1\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "data_byte",
+            "target": 85,
+            "meaning": "Example payload 0x55"
+          },
+          {
+            "address": 61444,
+            "name": "parity_bit",
+            "target": 0,
+            "meaning": "Even parity for four one-bits"
+          },
+          {
+            "address": 61448,
+            "name": "enabled",
+            "target": 1,
+            "meaning": "1 enables the demonstration"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "slug": "quantum",
+    "name": "Quantum model",
+    "category": "Conceptual simulation",
+    "description": "A conceptual cryostat and control assembly with an exact two-qubit state calculation. It does not model materials, cooling, or real quantum-device configuration.",
+    "labs": [
+      {
+        "title": "A Hadamard preparation",
+        "description": "A qubit state uses complex amplitudes.",
+        "component": "qpu",
+        "language_slug": "verilog",
+        "file": "quantum-01.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 1); // gate_mask\n    mmio_write(0xF004, 2); // qubits\n    mmio_write(0xF008, 0); // shots\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,1\nsw t1,0(t0)\nli t1,2\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 1,
+            "61444": 2,
+            "61448": 1024
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 1); // gate_mask\n    mmio_write(0xF004, 2); // qubits\n    mmio_write(0xF008, 1024); // shots\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,1\nsw t1,0(t0)\nli t1,2\nsw t1,4(t0)\nli t1,1024\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "gate_mask",
+            "target": 1,
+            "meaning": "Bit zero requests H on qubit zero"
+          },
+          {
+            "address": 61444,
+            "name": "qubits",
+            "target": 2,
+            "meaning": "Two-qubit mathematical model"
+          },
+          {
+            "address": 61448,
+            "name": "shots",
+            "target": 1024,
+            "meaning": "Requested count; probabilities are exact, not sampled"
+          }
+        ]
+      },
+      {
+        "title": "Entanglement as a correlated state",
+        "description": "A controlled-X gate flips its target when the control basis value is one.",
+        "component": "control",
+        "language_slug": "c",
+        "file": "quantum-02.md",
+        "starter_code_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 3); // gate_mask\n    mmio_write(0xF004, 2); // qubits\n    mmio_write(0xF008, 0); // shots\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "starter_code_asm": "lui t0,15\nli t1,3\nsw t1,0(t0)\nli t1,2\nsw t1,4(t0)\nli t1,0\nsw t1,8(t0)\nli a7,10\necall",
+        "expected_state": {
+          "mmio": {
+            "61440": 3,
+            "61444": 2,
+            "61448": 1024
+          }
+        },
+        "reference_c": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 3); // gate_mask\n    mmio_write(0xF004, 2); // qubits\n    mmio_write(0xF008, 1024); // shots\n    printf(\"Configuration written. Inspect MMIO and test checks.\\n\");\n    return 0;\n}",
+        "reference_assembly": "lui t0,15\nli t1,3\nsw t1,0(t0)\nli t1,2\nsw t1,4(t0)\nli t1,1024\nsw t1,8(t0)\nli a7,10\necall",
+        "fields": [
+          {
+            "address": 61440,
+            "name": "gate_mask",
+            "target": 3,
+            "meaning": "H on q0 followed by controlled-X from q0 to q1"
+          },
+          {
+            "address": 61444,
+            "name": "qubits",
+            "target": 2,
+            "meaning": "Two-qubit mathematical model"
+          },
+          {
+            "address": 61448,
+            "name": "shots",
+            "target": 1024,
+            "meaning": "Requested count; probabilities are exact, not sampled"
+          }
+        ]
+      }
+    ]
+  }
+]

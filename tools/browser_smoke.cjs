@@ -1,0 +1,32 @@
+/** Real-browser verification. Run against a disposable local development DB.
+ * Install the optional local test dependency: npm install --no-save playwright
+ * Then: npx playwright install chromium && node tools/browser_smoke.cjs
+ * This script creates only its own synthetic test account and test boot images.
+ */
+const { chromium } = require('playwright');
+const fs=require('node:fs');const path=require('node:path');const assert=require('node:assert/strict');
+(async()=>{
+ const base=process.env.BARE_METAL_TEST_URL||'http://127.0.0.1:8000';const out=path.join(__dirname,'../evidence/browser');fs.mkdirSync(out,{recursive:true});
+ const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const screenshot=async name=>page.screenshot({path:path.join(out,name+'.png'),fullPage:true});
+ const run=async()=>{await page.locator('#run-code').click();await page.waitForFunction(()=>!['IDLE','RUNNING'].includes(document.querySelector('#run-status').textContent));};
+ try {
+  await page.goto(base+'/');await screenshot('landing');
+  await page.getByRole('link',{name:/Create workspace/}).click();
+  const username='qa_'+Date.now();await page.locator('#id_username').fill(username);await page.locator('#id_email').fill(username+'@example.invalid');await page.locator('#id_password').fill('BrowserHarness#4920');await page.locator('#id_confirm_password').fill('BrowserHarness#4920');
+  await page.locator('[data-target="id_password"]').click();assert.equal(await page.locator('#id_password').getAttribute('type'),'text');await page.locator('[data-target="id_password"]').click();
+  await screenshot('register');await page.getByRole('button',{name:'Create workspace'}).click();await page.waitForURL('**/dashboard/');await screenshot('dashboard');
+  await page.getByRole('link',{name:'Learning path',exact:true}).click();await page.locator('.track-card').filter({has:page.getByRole('heading',{name:'C',exact:true})}).click();await page.locator('.lesson-index a').first().click();await run();assert.equal(await page.locator('#run-status').textContent(),'CHECKS PASSED');
+  await page.locator('#code-editor').fill('int main(void){printf("42");}');await run();assert.equal(await page.locator('#output').textContent(),'42');await page.waitForFunction(()=>document.querySelector('#draft-status').textContent==='Saved');await page.reload();assert.equal(await page.locator('#code-editor').inputValue(),'int main(void){printf("42");}');
+  await page.locator('#reset-code').click();await run();assert.match(await page.locator('#output').textContent(),/Hello, machine/);await screenshot('lesson');
+  await page.getByRole('button',{name:'Mark lesson complete'}).click();await page.getByRole('link',{name:'Dashboard',exact:true}).click();assert.match(await page.locator('.stat strong').textContent(),/^1/);
+  await page.getByRole('link',{name:'Hardware configuration',exact:true}).click();await page.locator('.hardware-card').filter({has:page.getByRole('heading',{name:'Personal computer',exact:true})}).getByRole('link',{name:'Inspect system'}).click();await page.getByRole('link',{name:/RAM capacity and parity mode/}).click();
+  await run();assert.equal(await page.locator('#run-status').textContent(),'CHECK TARGETS');await page.locator('#code-editor').fill('int main(void){mmio_write(0xF000,512);mmio_write(0xF004,1);mmio_write(0xF008,1);}');await run();assert.equal(await page.locator('#run-status').textContent(),'CHECKS PASSED');
+  await page.locator('[data-component="ram"]').click();assert.equal(await page.locator('[data-component="ram"]').getAttribute('aria-pressed'),'true');const before=await page.locator('.hardware-model').screenshot();await page.getByRole('button',{name:'Rotate model left'}).click();const after=await page.locator('.hardware-model').screenshot();assert(!before.equals(after));await page.getByRole('button',{name:'Zoom in',exact:true}).click();await screenshot('ram-configuration');
+  await page.getByRole('link',{name:'Build an OS',exact:true}).click();await run();assert.match(await page.locator('#boot-screen').textContent(),/BARE METAL OS/);await page.locator('#project-name').fill('Browser test boot');await page.locator('#save-boot').click();await page.waitForURL(/\/os\/\d+\/$/);await page.locator('#boot-saved').click();await page.waitForFunction(()=>document.querySelector('#boot-screen-status').textContent==='BOOTED / HALTED');
+  const downloadEvent=page.waitForEvent('download');await page.getByRole('link',{name:'Download .img'}).click();const download=await downloadEvent;const file=path.join(out,'test-boot.img');await download.saveAs(file);const bytes=fs.readFileSync(file);assert.equal(bytes.length,512);assert.equal(bytes.subarray(510).toString('hex'),'55aa');await screenshot('os-workspace');
+  await page.locator('.upload-details summary').click();await page.locator('#image-file').setInputFiles(file);await page.locator('#image-name').fill('Uploaded browser image');await page.getByRole('button',{name:'Upload image'}).click();await page.waitForURL(/\/os\/\d+\/$/);await page.locator('#boot-saved').click();await page.waitForFunction(()=>document.querySelector('#boot-screen-status').textContent==='BOOTED / HALTED');assert.match(await page.locator('#boot-screen').textContent(),/BARE METAL OS/);
+  await page.setViewportSize({width:390,height:844});await page.goto(base+'/dashboard/');await page.getByRole('button',{name:'Toggle navigation'}).click();assert.equal(await page.getByRole('button',{name:'Toggle navigation'}).getAttribute('aria-expanded'),'true');await page.getByRole('link',{name:'Free terminal',exact:true}).click();await page.locator('#playground-language').selectOption('rust');await page.waitForURL('**/playground/?lang=rust');await page.locator('#code-editor').fill('fn main(){let x:i32=1;x=2;}');await run();assert.match(await page.locator('#output').textContent(),/immutable/);await screenshot('mobile-terminal');
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Horizontal page overflow');assert.deepEqual(errors,[]);fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({status:'PASS',username,checks:20,errors},null,2));console.log('PASS: browser interactions, drafts, runs, models, boot workflow, mobile layout.');
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

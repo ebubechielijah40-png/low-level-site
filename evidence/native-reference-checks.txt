@@ -1,0 +1,1 @@
+PASS: 7 authored C reference outputs agree with GCC native execution.

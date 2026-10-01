@@ -1,17 +1,3 @@
-{% extends 'core/base.html' %}
-{% block content %}
-<div class="container">
-    <h1>Languages</h1>
-    <p style="opacity: 0.5; margin-bottom: 2rem; font-size: 13px;">Select a language to begin.</p>
-    <ul>
-        {% for language in languages %}
-        <li style="margin-bottom: 1rem;">
-            <a href="{% url 'language_detail' language.pk %}" style="font-size: 1.1rem;">
-                &gt; {{ language.name }}
-            </a>
-            <p style="opacity: 0.5; font-size: 13px; margin-top: 4px;">{{ language.description }}</p>
-        </li>
-        {% endfor %}
-    </ul>
-</div>
+{% extends 'core/base.html' %}{% block title %}Learning path — Bare Metal{% endblock %}{% block breadcrumb %}learning-path{% endblock %}{% block content %}
+<div class="page-heading"><div><span class="eyebrow">BITS → INSTRUCTIONS → SYSTEMS</span><h1>Follow the mechanism.</h1><p>A recommended sequence. Every lesson stays open.</p></div></div><div class="path-explanation"><span class="accent">&gt;_</span><p>Start with machine-code representation. Give instructions names in assembly. Use C to control objects and memory. Add Rust's access rules, then Verilog's hardware logic. Build a boot image as your first operating-system milestone.</p></div><div class="track-grid">{% for language in tracks %}{% include 'core/track_card.html' %}{% empty %}<p>No lessons yet. Run <code>python manage.py seed_lessons</code>.</p>{% endfor %}</div><div class="callout"><h3>Learning order is guidance, not a gate.</h3><p>Hardware configuration and the OS workspace are available from the beginning. Return to the language lesson when a mechanism needs explanation.</p><a class="text-link" href="{% url 'hardware_list' %}">Open hardware configuration ↗</a></div>
 {% endblock %}
