@@ -1,0 +1,1 @@
+Deployment upgrade PASS: fresh/repeated installs, legacy/renamed FK-index collision, completion deduplication, retained audit rows, accounts, protected backups, partial-schema rejection, owner-only configuration, stable secret, overwrite refusal and malformed URL rejection.

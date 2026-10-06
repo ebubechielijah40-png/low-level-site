@@ -4,7 +4,9 @@ Follow the exact Linux or PowerShell commands in README. Python 3.12 is the reco
 
 ## Existing installation
 
-Back up your existing database and repository first. Retain the original core migrations 0001–0005. Apply the added 0006 migration with `python manage.py migrate`, then seed lessons before hardware so language relationships exist. Re-running seeds updates authored content by track/lesson order and system/lab order; it does not create duplicate rows under the supplied catalogue.
+Keep this repository's complete migration history, ending at `0006_alter_language_options_hardwarechallenge_component_and_more`. A different old branch used other 0005/0006 files: do not mix those files into this graph or fake all migrations.
+
+Stop the app server, load your deployment environment, then run `python manage.py prepare_deployment`. It makes an owner-readable SQLite snapshot, handles the known existing completion-table/index collision, migrates, restores unique valid completions, seeds teaching, collects versioned compressed assets, and checks Django. It retains old completion rows and refuses unrelated/partial schemas. See [the follow-up guide](PERFORMANCE_AND_DEPLOYMENT.md). Seeds update the supplied catalogue and preserve unrelated custom lessons.
 
 The attached database had no languages, lessons, lesson progress, or hardware progress. It had six systems and thirteen legacy hardware exercises. Those system/order identities are reused for the new configurations. The archive intentionally excludes the user's original database and account. Historical language counters in other installations remain present but are not treated as individual lesson-completion evidence. If other installations have old hardware-completion records, review them when replacing the exercises: their historical task meaning may differ from the new target.
 
@@ -19,7 +21,7 @@ export DJANGO_ALLOWED_HOSTS=your-host.example
 export DJANGO_HTTPS=1
 ```
 
-Use a production WSGI/ASGI server behind HTTPS, serve collected static assets, and store the secret in your deployment environment. Do not use Django's development runserver as the public server. This package does not publish a site or change GitHub.
+Use the included Linux Gunicorn setup behind HTTPS and WhiteNoise for collected static assets. Keep the same private secret across restarts. `bash tools/start_server.sh` starts the service with its Git hash in `X-App-Revision`. The GitHub workflow tests pushes; it does not restart the owner's computer.
 
 ```bash
 python manage.py collectstatic --noinput
@@ -27,6 +29,8 @@ python manage.py check --deploy
 ```
 
 Debug-off settings enable secure cookies and HTTPS redirect by default and refuse the bundled development secret. Configure trusted proxy headers only for a proxy you actually control. Do not broaden allowed hosts or CSRF origins merely to hide a routing problem.
+
+For the existing tunnel, the helper in the follow-up guide creates an ignored `.env.deploy` once, with exact hosts/origin and an upstream bound to loopback. Its upstream HTTPS redirect is disabled to avoid scheme-header loops; public HTTPS and secure cookies remain. Other permanent HTTPS hosts should use `DJANGO_HTTPS=1` and configure their trusted proxy. Keep SQLite/backups on persistent storage.
 
 ## Before a public launch
 

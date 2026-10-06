@@ -1,2 +1,4 @@
 Django>=5.2,<6.2
 pycparser>=2.22,<3
+whitenoise[brotli]>=6.12,<7
+gunicorn>=26.2,<27; sys_platform != 'win32'

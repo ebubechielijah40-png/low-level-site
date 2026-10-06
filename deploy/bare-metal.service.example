@@ -1,0 +1,16 @@
+[Unit]
+Description=Bare Metal learning site
+After=network.target
+[Service]
+Type=simple
+User=elijah
+WorkingDirectory=/home/elijah/low-level-site
+EnvironmentFile=/home/elijah/low-level-site/.env.deploy
+ExecStart=/bin/bash /home/elijah/low-level-site/tools/start_server.sh
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+[Install]
+WantedBy=multi-user.target

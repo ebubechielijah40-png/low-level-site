@@ -1,0 +1,1 @@
+DOM PASS: password eyes, pending status, lazy 200-row trace/state/encoding, result refresh, tab reuse, reset, timeout recovery, diagnostics, RAM telemetry, batched draws and buffer reuse. No browser/layout/paint claim.

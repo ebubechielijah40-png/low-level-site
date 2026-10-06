@@ -36,7 +36,7 @@
   }
   class Model{
     constructor(canvas){this.canvas=canvas;this.ctx=canvas.getContext('2d');this.system=canvas.dataset.system||'pc';this.parts=parts[this.system]||parts.pc;this.scene=geometry(this.system);this.yaw=-.55;this.pitch=.45;this.zoom=1;this.selected=canvas.dataset.selected||Object.keys(this.parts)[0];this.telemetry=null;this.panel=canvas.closest('.model-panel');this.drag=null;this.moved=false;
-      this.makeButtons();new ResizeObserver(()=>this.draw()).observe(canvas);canvas.addEventListener('pointerdown',e=>{this.drag={x:e.clientX,y:e.clientY};this.moved=false;canvas.setPointerCapture(e.pointerId);});
+      this.makeButtons();new ResizeObserver(entries=>{this.width=entries[0].contentRect.width;this.height=entries[0].contentRect.height;this.draw();}).observe(canvas);canvas.addEventListener('pointerdown',e=>{this.drag={x:e.clientX,y:e.clientY};this.moved=false;canvas.setPointerCapture(e.pointerId);});
       canvas.addEventListener('pointermove',e=>{if(!this.drag)return;const dx=e.clientX-this.drag.x,dy=e.clientY-this.drag.y;this.moved=this.moved||Math.abs(dx)+Math.abs(dy)>2;this.yaw+=dx*.008;this.pitch=Math.max(-.15,Math.min(1.1,this.pitch+dy*.005));this.drag={x:e.clientX,y:e.clientY};this.draw();});
       canvas.addEventListener('pointerup',e=>{if(!this.moved){const rect=canvas.getBoundingClientRect();this.pick(e.clientX-rect.left,e.clientY-rect.top);}this.drag=null;});canvas.addEventListener('pointercancel',()=>this.drag=null);
       canvas.addEventListener('wheel',e=>{e.preventDefault();this.zoom=Math.max(.6,Math.min(1.75,this.zoom+(e.deltaY<0?.08:-.08)));this.draw();},{passive:false});
@@ -53,7 +53,8 @@
       }}
     project(x,y,z){const cy=Math.cos(this.yaw),sy=Math.sin(this.yaw),cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);const rx=x*cy+z*sy,rz=-x*sy+z*cy,ry=y*cp-rz*sp,depth=y*sp+rz*cp;return [this.width/2+rx*this.scale,this.height*.54-ry*this.scale,depth];}
     path(points){const c=this.ctx;c.beginPath();points.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.closePath();}
-    draw(){const rect=this.canvas.getBoundingClientRect();this.width=rect.width;this.height=rect.height;if(!this.width||!this.height)return;const ratio=Math.min(devicePixelRatio||1,2),c=this.ctx;this.canvas.width=this.width*ratio;this.canvas.height=this.height*ratio;c.scale(ratio,ratio);c.clearRect(0,0,this.width,this.height);this.scale=Math.min(this.width/10,this.height/6.6)*this.zoom;
+    draw(){if(this.framePending)return;this.framePending=true;requestAnimationFrame(()=>{this.framePending=false;this.paint();});}
+    paint(){if(!this.width||!this.height)return;const ratio=Math.min(devicePixelRatio||1,2),c=this.ctx,w=Math.round(this.width*ratio),h=Math.round(this.height*ratio);if(this.canvas.width!==w||this.canvas.height!==h){this.canvas.width=w;this.canvas.height=h;}c.setTransform(ratio,0,0,ratio,0,0);c.clearRect(0,0,this.width,this.height);this.scale=Math.min(this.width/10,this.height/6.6)*this.zoom;
       // Ground reference: it provides depth without implying an engineering drawing.
       c.strokeStyle='#29432c';c.lineWidth=.6;c.globalAlpha=.35;for(let i=-5;i<=5;i++){const a=this.project(i,-1.9,-5),b=this.project(i,-1.9,5);c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();const d=this.project(-5,-1.9,i),e=this.project(5,-1.9,i);c.beginPath();c.moveTo(d[0],d[1]);c.lineTo(e[0],e[1]);c.stroke();}c.globalAlpha=1;
       const faces=[],bounds=[];const indexes=[[0,1,2,3],[4,5,6,7],[0,1,5,4],[3,2,6,7],[0,3,7,4],[1,2,6,5]];

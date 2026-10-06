@@ -28,7 +28,11 @@ DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 if not DEBUG and SECRET_KEY == 'local-development-only-change-before-deployment':
     raise RuntimeError('Set DJANGO_SECRET_KEY when DJANGO_DEBUG=0.')
 
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,[::1],testserver').split(',')
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,[::1],testserver').split(',') if host.strip()]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+# Enable only when the trusted proxy strips client-supplied forwarded headers.
+if os.environ.get('DJANGO_TRUST_PROXY_SSL', '0') == '1':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -45,6 +49,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'core.middleware.ResponseTimingMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -120,7 +126,14 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = Path(os.environ.get('DJANGO_STATIC_ROOT', str(BASE_DIR / 'staticfiles')))
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+                    else 'whitenoise.storage.CompressedManifestStaticFilesStorage'},
+}
+WHITENOISE_MAX_AGE = 60
+APP_REVISION = os.environ.get('APP_REVISION', 'development')[:40]
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

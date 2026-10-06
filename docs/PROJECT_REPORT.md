@@ -3,6 +3,8 @@
 
 Technical final-year project report · 1 October 2026
 
+This records the initial upgrade. The [follow-up](PERFORMANCE_AND_DEPLOYMENT.md) adds production serving, repeatable database upgrades, 167 passing Django tests and measured response times. Browser/public-network speed and native kernel boot remain unverified.
+
 ## Abstract
 
 Bare Metal continues the supplied CL-fromgithub Django project and turns its disconnected lesson pages and incomplete execution flow into an integrated learning environment. The learner reads an authored explanation beside an editable terminal, executes a supported program, and inspects output, virtual machine state, traces, and instruction bytes. A focused progression begins with machine code and RV32I assembly, then introduces C, Rust, Verilog, and operating-system foundations. Hardware configuration labs associate documented virtual registers with selectable component models. A separate OS workspace stores, imports, downloads, and emulates per-user 512-byte x86 boot images.

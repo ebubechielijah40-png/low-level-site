@@ -1,0 +1,8 @@
+Production stack PASS: HTTPS proxy, secure session/CSRF cookies, signup, execution, hashed/gzip/immutable/304 static files, private boot downloads, revision/timing headers.
+{
+  "scope": "DEBUG=0; Gunicorn sync; loopback HTTP; 30 sequential small C runs; no WAN/browser/load",
+  "c_run_http_p95_ms": 12.97,
+  "c_run_server_p95_ms": 12.17,
+  "static_raw_bytes": 13630,
+  "static_gzip_bytes": 5093
+}

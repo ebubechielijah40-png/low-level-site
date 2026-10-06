@@ -1,0 +1,160 @@
+{
+  "date_utc": "2026-10-01T14:03:59Z",
+  "python": "3.12.14",
+  "django": "6.1.1",
+  "scope": "Django test client; DEBUG=0; fresh SQLite; sequential warmed requests; no network/browser/load",
+  "budget_ms": 300,
+  "results": [
+    {
+      "request": "GET landing",
+      "samples": 30,
+      "cold_ms": 46.92,
+      "p50_ms": 0.64,
+      "p95_ms": 1.26,
+      "max_ms": 1.48,
+      "queries": 0,
+      "response_bytes": 3965
+    },
+    {
+      "request": "GET login",
+      "samples": 30,
+      "cold_ms": 3.0,
+      "p50_ms": 1.12,
+      "p95_ms": 3.5,
+      "max_ms": 4.14,
+      "queries": 0,
+      "response_bytes": 3343
+    },
+    {
+      "request": "POST login",
+      "samples": 30,
+      "cold_ms": 216.57,
+      "p50_ms": 234.76,
+      "p95_ms": 276.09,
+      "max_ms": 290.9,
+      "queries": 9,
+      "response_bytes": 0
+    },
+    {
+      "request": "POST signup",
+      "samples": 30,
+      "cold_ms": 235.29,
+      "p50_ms": 217.18,
+      "p95_ms": 257.38,
+      "max_ms": 257.52,
+      "queries": 10,
+      "response_bytes": 0
+    },
+    {
+      "request": "GET dashboard",
+      "samples": 30,
+      "cold_ms": 8.33,
+      "p50_ms": 4.53,
+      "p95_ms": 6.56,
+      "max_ms": 33.43,
+      "queries": 8,
+      "response_bytes": 7769
+    },
+    {
+      "request": "GET learning path",
+      "samples": 30,
+      "cold_ms": 4.79,
+      "p50_ms": 3.09,
+      "p95_ms": 4.79,
+      "max_ms": 5.19,
+      "queries": 5,
+      "response_bytes": 6144
+    },
+    {
+      "request": "GET C lesson",
+      "samples": 30,
+      "cold_ms": 5.48,
+      "p50_ms": 3.11,
+      "p95_ms": 3.87,
+      "max_ms": 3.96,
+      "queries": 6,
+      "response_bytes": 12226
+    },
+    {
+      "request": "GET RAM configuration",
+      "samples": 30,
+      "cold_ms": 4.23,
+      "p50_ms": 3.15,
+      "p95_ms": 4.12,
+      "max_ms": 4.16,
+      "queries": 7,
+      "response_bytes": 11114
+    },
+    {
+      "request": "GET OS workspace",
+      "samples": 30,
+      "cold_ms": 2.87,
+      "p50_ms": 2.43,
+      "p95_ms": 3.43,
+      "max_ms": 5.34,
+      "queries": 4,
+      "response_bytes": 8659
+    },
+    {
+      "request": "POST execute machine",
+      "samples": 30,
+      "cold_ms": 1.56,
+      "p50_ms": 0.82,
+      "p95_ms": 1.05,
+      "max_ms": 1.15,
+      "queries": 2,
+      "response_bytes": 1349
+    },
+    {
+      "request": "POST execute assembly",
+      "samples": 30,
+      "cold_ms": 1.05,
+      "p50_ms": 0.88,
+      "p95_ms": 1.09,
+      "max_ms": 1.14,
+      "queries": 2,
+      "response_bytes": 2275
+    },
+    {
+      "request": "POST execute c",
+      "samples": 30,
+      "cold_ms": 11.45,
+      "p50_ms": 2.43,
+      "p95_ms": 3.69,
+      "max_ms": 3.92,
+      "queries": 2,
+      "response_bytes": 254
+    },
+    {
+      "request": "POST execute rust",
+      "samples": 30,
+      "cold_ms": 3.02,
+      "p50_ms": 2.65,
+      "p95_ms": 4.04,
+      "max_ms": 4.06,
+      "queries": 2,
+      "response_bytes": 293
+    },
+    {
+      "request": "POST execute verilog",
+      "samples": 30,
+      "cold_ms": 4.33,
+      "p50_ms": 2.25,
+      "p95_ms": 3.31,
+      "max_ms": 3.5,
+      "queries": 2,
+      "response_bytes": 444
+    },
+    {
+      "request": "POST execute boot",
+      "samples": 30,
+      "cold_ms": 1.23,
+      "p50_ms": 0.87,
+      "p95_ms": 1.41,
+      "max_ms": 1.46,
+      "queries": 2,
+      "response_bytes": 1607
+    }
+  ],
+  "passes_application_budget": true
+}

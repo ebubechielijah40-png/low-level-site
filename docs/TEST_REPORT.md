@@ -1,5 +1,7 @@
 # Verification report — 1 October 2026
 
+The initial upgrade's results follow. The [performance/deployment follow-up](PERFORMANCE_AND_DEPLOYMENT.md) records 167 passing Django tests and production, upgrade and DOM checks. Actual live browser latency remains unverified.
+
 ## Passed
 
 | Check | Observed result | Evidence |

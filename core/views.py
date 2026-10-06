@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import IntegrityError
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -51,7 +51,8 @@ def logout_view(request):
 
 def track_context(user):
     done=set(LessonCompletion.objects.filter(user=user).values_list('lesson_id',flat=True))
-    tracks=list(Language.objects.prefetch_related('lessons').all())
+    tracks=list(Language.objects.prefetch_related(Prefetch('lessons',
+        queryset=Lesson.objects.only('id','language_id','order','title','summary'))))
     for t in tracks:
         ls=list(t.lessons.all());t.lesson_count=len(ls);t.completed=sum(l.pk in done for l in ls)
         t.percentage=round(t.completed/max(1,len(ls))*100)
@@ -62,7 +63,7 @@ def track_context(user):
 def dashboard(request):
     tracks,done=track_context(request.user)
     next_lesson=next((t.next_lesson for t in tracks if t.completed<t.lesson_count),None)
-    return render(request,'core/dashboard.html',{'tracks':tracks,'done_count':len(done),'total_count':Lesson.objects.count(),
+    return render(request,'core/dashboard.html',{'tracks':tracks,'done_count':len(done),'total_count':sum(t.lesson_count for t in tracks),
             'next_lesson':next_lesson,'systems':HardwareSystem.objects.annotate(lab_count=Count('challenges')),
             'lab_count':HardwareProgress.objects.filter(user=request.user,completed=True).count(),
             'projects':request.user.boot_projects.all()[:3],'active_nav':'dashboard'})
@@ -76,13 +77,13 @@ def language_list(request):
 def language_detail(request,pk):
     language=get_object_or_404(Language,pk=pk)
     completed_ids=set(LessonCompletion.objects.filter(user=request.user,lesson__language=language).values_list('lesson_id',flat=True))
-    return render(request,'core/language_detail.html',{'language':language,'lessons':language.lessons.all(),
+    return render(request,'core/language_detail.html',{'language':language,'lessons':language.lessons.only('id','language_id','title','order','summary','minutes'),
             'completed_ids':completed_ids,'configurations':language.configurations.select_related('system').all(),'active_nav':'languages'})
 
 @login_required
 def lesson_detail(request,pk=None,language_pk=None,lesson_order=None):
     lesson=get_object_or_404(Lesson.objects.select_related('language'),pk=pk) if pk else get_object_or_404(Lesson,language_id=language_pk,order=lesson_order)
-    lessons=list(lesson.language.lessons.all());key=f'lesson:{lesson.pk}'
+    lessons=list(lesson.language.lessons.only('id','language_id','title','order'));key=f'lesson:{lesson.pk}'
     draft=CodeDraft.objects.filter(user=request.user,key=key).first()
     done=set(LessonCompletion.objects.filter(user=request.user).values_list('lesson_id',flat=True))
     return render(request,'core/lesson_detail.html',{'lesson':lesson,'all_lessons':lessons,
@@ -124,7 +125,7 @@ def hardware_challenge(request,slug,challenge_pk):
     return render(request,'core/hardware_challenge.html',{'system':system,'challenge':lab,'lab':lab,'engine':engine,
             'starter_code':starter,'editor_code':draft.code if draft else starter,'draft_key':key,'context_id':lab.pk,
             'context_kind':'lab','active_nav':'hardware',
-            'component_routes':{item.component:reverse('hardware_challenge',args=[slug,item.pk]) for item in system.challenges.all()}})
+            'component_routes':{component:reverse('hardware_challenge',args=[slug,pk]) for component,pk in system.challenges.values_list('component','pk')}})
 
 @login_required
 @require_POST

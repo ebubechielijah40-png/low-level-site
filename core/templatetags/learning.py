@@ -1,5 +1,6 @@
 """Small escaping-first renderer; authored Markdown cannot inject HTML/script."""
 import re
+from functools import lru_cache
 from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -13,7 +14,13 @@ def inline(s):
 
 @register.filter
 def prose(value):
-    lines=str(value).splitlines();out=[];paragraph=[];fence=False;code=[];list_kind=None;table=[]
+    return render_prose(str(value))
+
+# Full text is the key, so edits become visible without an invalidation job.
+# Never cache an authenticated page or a learner's source here.
+@lru_cache(maxsize=128)
+def render_prose(value):
+    lines=value.splitlines();out=[];paragraph=[];fence=False;code=[];list_kind=None;table=[]
     def flush():
         if paragraph:out.append('<p>'+inline(' '.join(paragraph))+'</p>');paragraph.clear()
     def endlist():

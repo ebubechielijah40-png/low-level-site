@@ -89,4 +89,4 @@ The separate `examples/minikernel` builds a freestanding 32-bit Multiboot ELF ke
 - `core/tests.py`, `tools/`: automated verification and reproducible build scripts.
 - `docs/`: audit, report, requirements, exact runner contracts, and presentation/demo guide.
 
-This continues the supplied repository and its migration history. No GitHub changes, push, or public deployment were performed.
+This continues the supplied repository and its migration history. The owner has applied the original upgrade to GitHub and a dev tunnel. See [Performance and deployment](docs/PERFORMANCE_AND_DEPLOYMENT.md) for measurements and the steps to activate future pushes. The authoring environment has not pushed or restarted the owner's server.

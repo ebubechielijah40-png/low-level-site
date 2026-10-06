@@ -1,0 +1,16 @@
+Creating test database for alias 'default'...
+./workspace/scratch/1d39d7611884/.runtime/django/core/handlers/base.py:63: UserWarning: No directory at: /workspace/scratch/1d39d7611884/low-level-site-current/staticfiles/
+  mw_instance = middleware(adapted_handler)
+......................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 167 tests in 3.648s
+
+OK
+Destroying test database for alias 'default'...
+Found 167 test(s).
+System check identified no issues (0 silenced).
+Seeded 6 tracks and 33 lessons.
+Seeded 6 component models and 13 configuration labs.
+Seeded 6 tracks and 33 lessons.
+Seeded 6 component models and 13 configuration labs.
+Deployment upgrade PASS: fresh/repeated installs, legacy/renamed FK-index collision, completion deduplication, retained audit rows, account preservation, protected backups, rejection of partial schema.

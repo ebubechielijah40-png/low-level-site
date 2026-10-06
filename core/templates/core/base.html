@@ -1,7 +1,7 @@
 {% load static %}<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#0b100d">
 <title>{% block title %}Bare Metal — Low-level learning{% endblock %}</title>
-<link rel="stylesheet" href="{% static 'core/css/style.css' %}"><script defer src="{% static 'core/js/app.js' %}"></script><script defer src="{% static 'core/js/model.js' %}"></script></head>
+<link rel="stylesheet" href="{% static 'core/css/style.css' %}"><script defer src="{% static 'core/js/performance.js' %}"></script><script defer src="{% static 'core/js/app.js' %}"></script><script defer src="{% static 'core/js/model.js' %}"></script></head>
 <body data-user="{{ user.pk|default:'guest' }}" class="{% if user.is_authenticated %}app{% else %}guest{% endif %} {% block body_class %}{% endblock %}">
 <svg class="svg-defs" aria-hidden="true"><defs>
 <symbol id="i-grid" viewBox="0 0 24 24"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"/></symbol>
@@ -21,7 +21,7 @@
 <a href="{% url 'playground' %}" class="{% if active_nav == 'playground' %}active{% endif %}"><span class="nav-symbol">&gt;_</span>Free terminal</a>
 </nav><div class="sidebar-note"><span class="dot"></span> All labs are open<p>Follow the path.<br>Explore when you need to.</p><div class="pixel-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
 <div class="sidebar-user"><span class="avatar">{{ user.username|slice:':1'|upper }}</span><div>{{ user.username }}<small>Personal workspace</small></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="icon-button" aria-label="Sign out" title="Sign out">↗</button></form></div></aside>
-<div class="main-panel"><header class="topbar"><button class="icon-button menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button><div class="breadcrumb"><span>~/bare-metal</span> / {% block breadcrumb %}workspace{% endblock %}</div><div class="top-status"><span class="dot"></span> LOCAL LEARNING ENVIRONMENT <span class="clock"></span></div></header>
+<div class="main-panel"><header class="topbar"><button class="icon-button menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button><div class="breadcrumb"><span>~/bare-metal</span> / {% block breadcrumb %}workspace{% endblock %}</div><div class="top-status"><span class="dot"></span> LEARNING ENVIRONMENT <span class="clock"></span></div></header>
 {% else %}
 <header class="public-header"><a class="brand" href="{% url 'landing' %}"><span class="brand-mark">▥</span>BARE<span class="muted">/</span>METAL</a><nav><a href="{% url 'login' %}">Sign in</a><a class="button primary small" href="{% url 'register' %}">Create workspace <span>↗</span></a></nav></header>
 {% endif %}
