@@ -9,6 +9,7 @@ class Language(models.Model):
     order = models.PositiveIntegerField(default=0)
     engine = models.CharField(max_length=20, default='c')
     subtitle = models.CharField(max_length=180, default='', blank=True)
+    is_archived = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['order', 'pk']
@@ -28,6 +29,7 @@ class Lesson(models.Model):
     summary = models.CharField(max_length=240, default='', blank=True)
     expected_state = models.JSONField(default=dict, blank=True)
     minutes = models.PositiveIntegerField(default=25)
+    is_archived = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['order']

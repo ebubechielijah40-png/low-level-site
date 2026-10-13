@@ -1,3 +1,54 @@
+## Before configuring parallel compute
+
+Review [worker budgets and parallel limits](/learn/device/6/), [buffers and networks](/learn/device/5/), and [ownership](/learn/device/4/). A node contains resources, a worker executes scheduled work, and a task decomposition defines what can actually run independently. Multiplying node and worker counts calculates a requested allocation, not achieved speedup.
+
+## Derive the allocation and its assumptions
+
+The profile targets sixteen nodes with eight workers on each, giving 128 requested workers. If each required 32 MiB under an assumed workload, their stated working-memory budget would be 4096 MiB across the allocation, before shared data, communication, and system overhead. Placement must respect resources on each node, not just the aggregate total.
+
+Amdahl's ideal bound is `1/(s+(1-s)/N)`, where s is the serial fraction and N the independent workers. With ten percent serial work and 128 workers it is about 9.34, not 128. This model still excludes communication, synchronization, imbalance, and scheduling overhead, which can make observed performance lower.
+
+## Data movement can dominate arithmetic
+
+A task needs its input data on the node where it executes. Moving that data consumes bandwidth and incurs latency. Synchronization can make fast workers wait for slow ones. A useful implementation identifies independent tasks, partitions data, controls communication, and measures scaling under a fixed problem definition. Increasing worker count without that analysis can make a workload slower.
+
+Actual configuration requires a scheduler/runtime, per-node capabilities, memory and device availability, network topology, deployment of executables and data, admission policy, and failure handling. Those are systems concepts. Learning an additional language does not supply them, though C, Rust, or another systems language can implement parts of the software.
+
+## Try the virtual profile beside the documentation
+
+Run the reference and inspect MMIO 16, 8, 1. The derived `requested_workers` telemetry should be 128. Change workers_per_node to four and predict 64, while the fixed target check fails. No measured execution time changes are claimed by that multiplication: the site's runtime executes your configuration source in one bounded teaching engine, not on 128 compute workers.
+
+For independent reasoning, calculate ideal bounds at N=1, 8, and 128 for a ten-percent serial fraction, then identify the additional costs you would measure. Explain the difference between an allocation accepted by a scheduler, workers actually launched, correct results produced, and observed scaling. The profile task establishes only the encoded request.
+
+## Try this in the terminal beside the documentation
+
+Read the prerequisite explanation and register table before running. These two complete reference programs produce the same target MMIO values. Use the language switch above the workspace to select C or RV32I assembly, load the matching example, then press Run. Inspect **State / mmio** and the component telemetry.
+
+```c run:reference
+#include <stdio.h>
+int main(void) {
+    mmio_write(0xF000, 16); // nodes
+    mmio_write(0xF004, 8); // workers_per_node
+    mmio_write(0xF008, 1); // enabled
+    printf("Configuration written. Inspect MMIO and test checks.\n");
+    return 0;
+}
+```
+
+```assembly run:reference
+lui t0,15
+li t1,16
+sw t1,0(t0)
+li t1,8
+sw t1,4(t0)
+li t1,1
+sw t1,8(t0)
+li a7,10
+ecall
+```
+
+Both references should pass all three address targets in the table. The starter intentionally misses one target. Passing records the configured **virtual profile**; use the guided mutations below to distinguish encoding, domain constraints and measured physical behavior. Each run starts with fresh register state.
+
 ## What this component does
 A compute cluster distributes work across nodes. Parallel speedup depends on how much work can run independently and how much must remain serial or communicate. Sixteen nodes with eight workers each request 128 workers, but that arithmetic is not evidence of a 128-fold speedup.
 

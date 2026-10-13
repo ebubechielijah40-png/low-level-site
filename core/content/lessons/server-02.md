@@ -1,3 +1,65 @@
+## Before configuring the network profile
+
+Review [byte protocols and MTU](/learn/device/5/), [buffer ownership](/learn/device/4/), and [resource limits](/learn/device/6/). A network interface transmits frames. IP packages datagrams across networks, transport protocols add their own semantics, and applications define messages. A software connection count is not the number of frames a NIC can physically transmit at once.
+
+## Derive a payload budget under explicit assumptions
+
+The target asks for MTU 1500 bytes, capacity for thirty-two connections, and enabled one. For IPv4 without options and TCP without options, subtract twenty bytes for each header from this IP MTU to obtain 1460 bytes. Extra options, encapsulation, a smaller path MTU, or another protocol change the calculation. Link-layer headers are outside that IP-packet MTU calculation.
+
+```c run:network-budget
+#include <stdio.h>
+int main(void) {
+    int mtu = 1500;
+    int ip_header = 20;
+    int tcp_header = 20;
+    int payload = mtu - ip_header - tcp_header;
+    int connections = 32;
+    int buffer_bytes = 4096;
+    printf("payload=%d connection_buffer_bytes=%d\n",
+           payload, connections * buffer_bytes);
+    return 0;
+}
+```
+
+Try this in the terminal beside the documentation. Expect `payload=1460 connection_buffer_bytes=131072`. It is a calculation, so it intentionally does not satisfy the lab's MMIO profile checks. The connection-buffer product omits other per-connection state and kernel overhead; it is not a total memory measurement.
+
+## A real interface needs a path and policy
+
+Identify the supported device/driver, link state, addressing, routes, protocol configuration, MTU compatibility, buffers, ownership, offloads, and admission limits. A correct local MTU request does not prove an entire path accepts packets of that size. A connection capacity does not open thirty-two live connections; application and transport state must exist.
+
+The site's reference writes MTU, connection capacity, and enable fields to plain virtual registers. It does not create sockets, send frames, resolve addresses, route packets, or model congestion. Component telemetry reflects this profile, not observed link traffic.
+
+Run the reference and compare the MMIO values 1500, 32, 1. Change MTU to 1400; the generic code still executes, while the fixed target fails and the arithmetic payload budget would be 1360 under the same header assumptions. Change connections to sixty-four and derive the doubled stated buffer requirement. Explain what packet, resource, and workload observations would be required before claiming that either setting improves network performance.
+
+## Try this in the terminal beside the documentation
+
+Read the prerequisite explanation and register table before running. These two complete reference programs produce the same target MMIO values. Use the language switch above the workspace to select C or RV32I assembly, load the matching example, then press Run. Inspect **State / mmio** and the component telemetry.
+
+```c run:reference
+#include <stdio.h>
+int main(void) {
+    mmio_write(0xF000, 1500); // mtu_bytes
+    mmio_write(0xF004, 32); // connections
+    mmio_write(0xF008, 1); // enabled
+    printf("Configuration written. Inspect MMIO and test checks.\n");
+    return 0;
+}
+```
+
+```assembly run:reference
+lui t0,15
+li t1,1500
+sw t1,0(t0)
+li t1,32
+sw t1,4(t0)
+li t1,1
+sw t1,8(t0)
+li a7,10
+ecall
+```
+
+Both references should pass all three address targets in the table. The starter intentionally misses one target. Passing records the configured **virtual profile**; use the guided mutations below to distinguish encoding, domain constraints and measured physical behavior. Each run starts with fresh register state.
+
 ## What this component does
 A network interface moves frames while protocol stacks interpret them and applications handle messages. An MTU is a size boundary for a particular link or interface, not a guarantee that a larger end-to-end message fits in one packet. Connection limits belong to resource policy above the physical wire.
 

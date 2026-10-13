@@ -1,0 +1,26 @@
+{
+  "recorded_on": "2026-10-13",
+  "django_tests": {"status": "PASS", "count": 287, "log": "django-tests.txt"},
+  "documented_programs": {"status": "PASS", "count": 98, "intentional_diagnostics": 6, "log": "example-checks.json"},
+  "catalogue": {"tracks": 7, "lessons": 41, "hardware_guides": 13, "lab_references": 26, "incomplete_target_failures": 26},
+  "system_check": "PASS: no issues",
+  "migration_consistency": "PASS: no changes detected",
+  "real_http_workflow": "PASS: registration, cookies, CSRF, lesson execution, RAM targets, boot save/download/run",
+  "deployment_upgrades": "PASS: fresh/repeated, legacy/renamed completion-index collision, deduplication, preserved accounts/audit rows, protected coherent backups, partial-schema rejection",
+  "production_stack": "PASS: HTTPS proxy, secure session/CSRF cookies, signup, execution, hashed/gzip/immutable/304 static assets, private downloads, revision/timing headers",
+  "production_timing": {
+    "scope": "DEBUG=0; Gunicorn sync; loopback HTTP; 30 sequential small C runs; excludes WAN, browser and concurrent load",
+    "http_p95_ms": 31.02,
+    "application_p95_ms": 15.26,
+    "static_raw_bytes": 14496,
+    "static_gzip_bytes": 5323
+  },
+  "native_c_reference": "PASS: seven authored outputs agree with GCC",
+  "frontend_dom": {"status": "PASS", "log": "frontend-dom.txt", "scope": "load/restore, engine matching, no implicit execution and existing result/draft/model event behavior; excludes pixels, scrolling, mobile layout and paint"},
+  "javascript_syntax": "PASS: app.js, frontend_dom_smoke.cjs, browser_smoke.cjs",
+  "browser": {"status": "BLOCKED", "reason": "Playwright Chromium executable is not installed", "script": "tools/browser_smoke.cjs"},
+  "physical_hardware": "NOT TESTED",
+  "native_elf_kernel_boot": "NOT VERIFIED",
+  "learning_outcomes": "NOT STUDIED",
+  "count_note": "Inventories overlap: documentation programs repeat some catalogue and runtime cases; do not add them as independent evidence totals."
+}

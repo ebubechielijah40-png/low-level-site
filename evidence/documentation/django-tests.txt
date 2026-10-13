@@ -1,0 +1,21 @@
+Creating test database for alias 'default'...
+[test environment]/django/core/handlers/base.py:63: UserWarning: No directory at: [project]/staticfiles/
+  mw_instance = middleware(adapted_handler)
+...............................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 287 tests in 5.216s
+
+OK
+Destroying test database for alias 'default'...
+Found 287 test(s).
+System check identified no issues (0 silenced).
+Seeded 7 tracks and 41 lessons.
+Seeded 6 component models and 13 configuration labs.
+Seeded 7 tracks and 41 lessons.
+Seeded 7 tracks and 41 lessons.
+Seeded 7 tracks and 41 lessons.
+Seeded 7 tracks and 41 lessons.
+Seeded 7 tracks and 41 lessons.
+Seeded 6 component models and 13 configuration labs.
+Seeded 7 tracks and 41 lessons.
+Seeded 6 component models and 13 configuration labs.

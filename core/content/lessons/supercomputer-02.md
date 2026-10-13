@@ -1,3 +1,54 @@
+## Before configuring an interconnect profile
+
+Know [message and buffer boundaries](/learn/device/5/), [parallel resources](/learn/device/6/), and [DMA ownership](/learn/device/4/). A physical lane, a logical path, a queue, and an application message are different objects. The profile's four lanes are illustrative communication paths, not a standardized hardware link-control register.
+
+## Derive latency and transfer cost separately
+
+A simple isolated-message model is `time = fixed_latency + bytes/bandwidth`. If a path supplies 1 byte per nanosecond and has 1000 ns fixed latency, a 256-byte transfer would take 1256 ns under those assumed parameters. Doubling the bytes to 512 yields 1512 ns, not twice the original time, because the fixed term stays unchanged.
+
+Real links add headers, coding, acknowledgements, buffering, arbitration, congestion, and topology effects. Several lanes can improve aggregate bandwidth only if the protocol, routing, and traffic pattern use them. A synchronization barrier may remain dominated by the slowest participant or by latency regardless of nominal aggregate bandwidth.
+
+## Message correctness has a protocol
+
+Sender and receiver need agreed length, byte order, type or operation identifier, ordering, completion, and ownership rules. A buffer must stay valid until the communication mechanism is finished with it. DMA or direct transfer does not remove mapping and visibility obligations. A received byte count is not proof the application interpreted the content correctly.
+
+An actual high-performance fabric configuration needs supported devices and firmware, link capabilities, routing/topology, queues and memory registration where relevant, flow control, error counters, and a benchmark appropriate to the message distribution. The site's profile records lanes=4, message_bytes=256, and enable=1. It does not move messages, route traffic, create a communication runtime, or estimate physical time.
+
+## Try and inspect beside the guide
+
+Run the reference and verify the three final MMIO values. Change message_bytes to 512 and predict only the changed request field and fixed-target failure. Explain the 1512 ns estimate only after explicitly supplying the hypothetical bandwidth and latency above. It must not be presented as returned site telemetry or observed device behavior.
+
+For independent work, compare small messages with a bulk transfer under the same hypothetical path, then describe why a real benchmark needs both latency and sustained throughput measurements. Identify what happens to a buffer's ownership while the message is pending. A complete interconnect configuration consists of those protocol and capability facts, not simply more low-level syntax.
+
+## Try this in the terminal beside the documentation
+
+Read the prerequisite explanation and register table before running. These two complete reference programs produce the same target MMIO values. Use the language switch above the workspace to select C or RV32I assembly, load the matching example, then press Run. Inspect **State / mmio** and the component telemetry.
+
+```c run:reference
+#include <stdio.h>
+int main(void) {
+    mmio_write(0xF000, 4); // lanes
+    mmio_write(0xF004, 256); // message_bytes
+    mmio_write(0xF008, 1); // enabled
+    printf("Configuration written. Inspect MMIO and test checks.\n");
+    return 0;
+}
+```
+
+```assembly run:reference
+lui t0,15
+li t1,4
+sw t1,0(t0)
+li t1,256
+sw t1,4(t0)
+li t1,1
+sw t1,8(t0)
+li a7,10
+ecall
+```
+
+Both references should pass all three address targets in the table. The starter intentionally misses one target. Passing records the configured **virtual profile**; use the guided mutations below to distinguish encoding, domain constraints and measured physical behavior. Each run starts with fresh register state.
+
 ## What this component does
 Parallel nodes must exchange data. An interconnect has latency, throughput, topology, and contention properties. A small message may be dominated by fixed latency, while a large transfer may be dominated by bandwidth. Multiple lanes can help only when the communication pattern and implementation use them.
 

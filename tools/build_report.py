@@ -1,5 +1,6 @@
 """Build the editable Markdown technical report into a print-ready PDF."""
 from pathlib import Path
+import json
 import re
 from xml.sax.saxutils import escape
 from reportlab.pdfgen import canvas
@@ -12,12 +13,17 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 root=Path(__file__).resolve().parents[1]
+report_text=(root/'docs/PROJECT_REPORT.md').read_text()
+report_date=re.search(r'\d{1,2} [A-Z][a-z]+ \d{4}',report_text)[0].upper()
+lesson_count=sum(len(track['lessons']) for track in json.loads((root/'core/content/catalog.json').read_text()))
+configuration_count=sum(len(system['labs']) for system in json.loads((root/'core/content/hardware.json').read_text()))
+test_count=re.search(r'recorded suite passed (\d+) tests',report_text)[1]
 output=root/'output/pdf';output.mkdir(parents=True,exist_ok=True)
 font=Path('/usr/share/fonts/truetype/dejavu')
 for name,file in [('ReportSans','DejaVuSans.ttf'),('ReportBold','DejaVuSans-Bold.ttf'),('ReportMono','DejaVuSansMono.ttf')]:pdfmetrics.registerFont(TTFont(name,str(font/file)))
 GREEN=colors.HexColor('#244F37');PALE=colors.HexColor('#EAF1E7');INK=colors.HexColor('#22342A');MUTED=colors.HexColor('#617067');LINE=colors.HexColor('#C9D6C7')
 styles={
- 'body':ParagraphStyle('body',fontName='ReportSans',fontSize=9.1,leading=14,textColor=INK,spaceAfter=9),
+ 'body':ParagraphStyle('body',fontName='ReportSans',fontSize=9.1,leading=14,textColor=INK,spaceAfter=9,allowWidows=0,allowOrphans=0),
  'h2':ParagraphStyle('h2',fontName='ReportBold',fontSize=18.5,leading=24,textColor=GREEN,spaceBefore=7,spaceAfter=15,keepWithNext=True),
  'h3':ParagraphStyle('h3',fontName='ReportBold',fontSize=11.5,leading=16,textColor=GREEN,spaceBefore=13,spaceAfter=6,keepWithNext=True),
  'cell':ParagraphStyle('cell',fontName='ReportSans',fontSize=8.2,leading=12.2,textColor=INK),
@@ -29,6 +35,7 @@ def clean(s):
  return s.translate(str.maketrans({'–':'-','—':'-','‑':'-','→':'->','’':"'",'“':'"','”':'"'}))
 def inline(s):
  s=escape(clean(s));s=re.sub(r'`([^`]+)`',r'<font name="ReportMono" color="#244F37">\1</font>',s);s=re.sub(r'\*\*([^*]+)\*\*',r'<b>\1</b>',s)
+ s=re.sub(r'\[([^\]]+)\]\(([^)]+)\)',lambda m:'<link href="'+m[2]+'" color="#244F37">'+m[1]+'</link>' if m[2].startswith('https://') else m[1],s)
  return s
 class Cover(Flowable):
  def __init__(self):super().__init__();self.width=487;self.height=690
@@ -43,12 +50,12 @@ class Cover(Flowable):
   c.setFont('ReportSans',16);c.setFillColor(INK)
   for i,line in enumerate(subtitle):c.drawString(0,h-162-i*25,line)
   c.setStrokeColor(LINE);c.setLineWidth(1);c.line(0,h-230,487,h-230)
-  c.setFont('ReportMono',9);c.setFillColor(MUTED);c.drawString(0,h-256,'EXISTING REPOSITORY UPGRADE     /     01 OCTOBER 2026')
+  c.setFont('ReportMono',9);c.setFillColor(MUTED);c.drawString(0,h-256,'EXISTING REPOSITORY UPGRADE     /     '+report_date)
   c.setFont('ReportSans',10);c.setFillColor(INK)
-  for i,line in enumerate(['Machine code. Assembly. C. Rust. Verilog. OS foundations.',
+  for i,line in enumerate(['Machine code. Assembly. C. Devices. Rust. Verilog. OS.',
                             'Read the mechanism, run the experiment, inspect the state.']):c.drawString(0,h-303-i*20,line)
   c.setFillColor(PALE);c.rect(0,h-480,487,108,fill=1,stroke=0)
-  for x,num,label in [(18,'33','AUTHORED LESSONS'),(181,'13','CONFIGURATIONS'),(345,'163','TESTS PASSED')]:
+  for x,num,label in [(18,str(lesson_count),'AUTHORED LESSONS'),(181,str(configuration_count),'CONFIGURATIONS'),(345,test_count,'TESTS PASSED')]:
    c.setFillColor(GREEN);c.setFont('ReportMono',31);c.drawString(x,h-421,num);c.setFont('ReportMono',7);c.drawString(x,h-447,label)
   c.setFillColor(MUTED);c.setFont('ReportSans',9)
   for i,line in enumerate(['Evidence and execution contracts are included.',
@@ -60,12 +67,12 @@ def frame(c,doc):
  c.saveState();c.setFillColor(colors.HexColor('#FAFCF8'));c.rect(0,0,*A4,fill=1,stroke=0)
  if doc.page>1:
   c.setFillColor(GREEN);c.setFont('ReportMono',7);c.drawString(54,809,'BARE METAL  /  TECHNICAL PROJECT REPORT');c.setStrokeColor(LINE);c.line(54,798,541,798)
- c.setStrokeColor(LINE);c.line(54,44,541,44);c.setFillColor(MUTED);c.setFont('ReportMono',7);c.drawString(54,30,'01 OCT 2026  /  IMPLEMENTED SCOPE AND VERIFIED EVIDENCE');c.drawRightString(541,30,f'{doc.page:02d}');c.restoreState()
+ c.setStrokeColor(LINE);c.line(54,44,541,44);c.setFillColor(MUTED);c.setFont('ReportMono',7);c.drawString(54,30,report_date+'  /  IMPLEMENTED SCOPE AND VERIFIED EVIDENCE');c.drawRightString(541,30,f'{doc.page:02d}');c.restoreState()
 
-story=[Cover(),PageBreak()];lines=(root/'docs/PROJECT_REPORT.md').read_text().splitlines();para=[];rows=[];fence=False;code=[];section=None
+story=[Cover(),PageBreak()];lines=report_text.splitlines();para=[];rows=[];fence=False;code=[];section=None
 
 def flush():
- if para:story.append(KeepTogether([Paragraph(inline(' '.join(para)),styles['body'])]));para.clear()
+ if para:story.append(Paragraph(inline(' '.join(para)),styles['body']));para.clear()
 def flush_table():
  if not rows:return
  cols=len(rows[0]);widths=[40,165,282] if cols==3 else [126,361] if cols==2 else [487/cols]*cols
@@ -91,7 +98,7 @@ for line in lines:
  elif not line.strip():flush()
  else:para.append(line)
 flush();flush_table()
-doc=SimpleDocTemplate(str(output/'Bare-Metal-Project-Report.pdf'),pagesize=A4,leftMargin=54,rightMargin=54,topMargin=61,bottomMargin=61,
+doc=SimpleDocTemplate(str(output/'Bare-Metal-Updated-Project-Report.pdf'),pagesize=A4,leftMargin=54,rightMargin=54,topMargin=61,bottomMargin=61,
                       title='Bare Metal - Technical final-year project report',author='Bare Metal project',subject='Implemented learning environment, architecture, verification, and limits')
 doc.build(story,onFirstPage=frame,onLaterPages=frame)
-print(output/'Bare-Metal-Project-Report.pdf')
+print(output/'Bare-Metal-Updated-Project-Report.pdf')

@@ -1,6 +1,12 @@
-# Verification report — 1 October 2026
+# Verification report — current documentation upgrade, 13 October 2026
 
-The initial upgrade's results follow. The [performance/deployment follow-up](PERFORMANCE_AND_DEPLOYMENT.md) records 167 passing Django tests and production, upgrade and DOM checks. Actual live browser latency remains unverified.
+The current suite passed 287 tests. All 98 runnable documentation programs, 41 lesson starters, 26 hardware references and 26 incomplete starter target failures passed their declared checks. Example loading/restoration, engine matching, prerequisite routes, stale teaching archival and corrected telemetry are covered. Real HTTP, production serving, fresh/legacy/repeated upgrades, migration checks and seven native C references passed. See [the current update report](DOCUMENTATION_UPGRADE_REPORT.md) and `evidence/documentation/` for the current records. Actual live browser latency and rendered mobile/desktop verification remain unverified.
+
+Absolute machine paths in the recorded logs are normalized as `[project]` and `[test environment]`; test counts and results are unchanged.
+
+## Initial implementation record
+
+The tables below retain the original 1 October 2026 verification inventory, including the distinct earlier kernel compile/link evidence. They are historical results and are superseded by the current update's counts where the scope changed. The [performance/deployment follow-up](PERFORMANCE_AND_DEPLOYMENT.md) records the intermediate 167-test release.
 
 ## Passed
 

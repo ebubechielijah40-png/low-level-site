@@ -1,3 +1,43 @@
+## Before decoding: fields occupy positions
+
+Review [bit patterns and machine state](/learn/machine/1/). A field is a selected group of bit positions. Shifting changes which positions a value occupies; masking discards positions you do not want. The same operations that assemble an instruction also decode it. You do not need to memorize every hex word, but you must be able to derive one and explain each part.
+
+For a word `w`, ADDI decoding uses `opcode = w & 0x7F`, `rd = (w >> 7) & 31`, `funct3 = (w >> 12) & 7`, `rs1 = (w >> 15) & 31`, and `raw_imm = (w >> 20) & 0xFFF`. Mask 31 is five one-bits and isolates a register index. Mask seven isolates three selector bits. Bit numbering starts at zero; the rightmost bit is the least significant.
+
+## Derive both words, then derive their effects
+
+For `00700293`, the fields are immediate 7, rs1 0, funct3 0, rd 5, opcode 0x13. The effect is x5=7. For `00328293`, immediate 3, rs1 5, funct3 0, rd 5, opcode 0x13. Its effect is x5=old x5+3=10. The second instruction depends on the first because its source field now selects x5, not x0. Changing only that source field can create a valid instruction with a wrong answer.
+
+A signed twelve-bit immediate uses bit eleven as its sign. If the raw field is at least 2048, subtract 4096 to obtain the signed value. Thus `0xFFF` gives 4095-4096=-1, while `0x7FF` gives 2047. The field cannot encode +2048 as a positive ADDI immediate. Larger constants need other instructions or an assembler expansion.
+
+## A second complete decoding experiment
+
+Try this in the terminal beside the documentation. Predict x5's stored pattern and x6's value before loading it.
+
+```machine run:signed-immediate
+fff00293
+00128313
+00000073
+```
+
+Expect x5=4294967295 in the unsigned register display and x6=0. The first word represents -1; the second adds one to those register bits. Register addition keeps the low 32 bits. The signed immediate rule and the fixed-width arithmetic rule are separate steps in that explanation.
+
+For independent decoding, derive `addi x6,x5,-2` as `ffe28313`. Insert it after the original two arithmetic words and before ECALL. Predict x6=8, then inspect the trace to confirm the source was ten and the immediate was -2. Explain an error by naming a field, an interpretation rule, or a state dependency rather than describing hex as unreadable.
+
+## Try this in the terminal beside the documentation
+
+The following is a complete program for this page's engine. Load it into the terminal beside this explanation, predict the result, then press Run. Open **State** for final values, **Trace** for recorded execution, and **Encoding** for emitted bytes when this engine supplies them.
+
+```machine run:reference
+00700293
+00328293
+00000073
+```
+
+Expected result: State / registers: `x5 = 10`.
+
+The fixed reference checks describe this program. A deliberate mutation can run correctly while failing those original checks; compare it with your new prediction. **Restore draft** restores the source present before the most recent example load.
+
 ## The agreement between software and hardware
 An instruction-set architecture, or ISA, defines what instruction bits mean. RV32I is a particular ISA; x86 and ARM have different encodings. Machine code therefore belongs to an architecture, not to computers in general. You cannot send an RV32I instruction to an x86 processor and expect the same result.
 

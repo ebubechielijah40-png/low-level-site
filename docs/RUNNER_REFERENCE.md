@@ -1,5 +1,7 @@
 # Exact execution contracts
 
+The device-foundation track uses the existing C engine for explicit software models of controller lifecycle, event acknowledgement, data publication and state transitions. It does not add interrupt delivery, DMA, cache coherence, real clocks or sequential HDL support. Complete marked examples load into the matching terminal without execution; the documentation verifier checks their actual program behavior. See [the curriculum map](CURRICULUM_AND_CONFIGURATION.md).
+
 The site's Run button executes a documented model. It never launches a submitted program as a host process, invokes a shell, or sends source to an external service. These contracts define the supported subset; they do not imply complete language-standard compliance.
 
 ## Shared bounds

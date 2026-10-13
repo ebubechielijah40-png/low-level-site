@@ -1,3 +1,54 @@
+## Before configuring replication
+
+Review [failure domains and resource limits](/learn/device/6/) and [acknowledgement semantics](/learn/device/2/). A node count, replica count, existing durable copies, and required acknowledgement quorum answer different questions. A configuration number must not be presented as evidence that data has actually been copied or can survive a particular failure.
+
+## Derive what six nodes and three replicas permit
+
+The target requests six nodes and three copies per object. Numerically, three distinct-node placements are possible because `0<3<=6`. That condition says nothing about which nodes are chosen, whether copies agree, or whether they share one power supply or rack. Independent failure domains matter when an event can remove multiple nodes together.
+
+If three independent durable copies already exist, losing two can still leave one. A majority quorum of a three-member replica group requires two members, so availability of that quorum after losing two is a different outcome. A six-node pool is not automatically one six-voter consensus group. Define which group, operations, and failure model you mean before calculating tolerance.
+
+## Replication requires a protocol and recovery
+
+A write can be received, cached, persisted, replicated, or committed under a stated protocol. Acknowledgement at one layer does not prove the next. Recovery must handle partial writes, stale copies, rejoining nodes, ownership of repair work, and data verification. Networking, durable storage, ordering, and failure detection are additional necessary systems knowledge beyond C syntax.
+
+This site records requested node and replica counts and computes whether distinct-node placement is numerically possible. It does not create a distributed system, transfer objects, select racks, run consensus, fail nodes, or model durable storage. The visualization illustrates the components relevant to the request rather than a live data centre.
+
+## Try and challenge the profile beside the guide
+
+Run the reference and inspect MMIO 6, 3, 1 and telemetry `distinct_node_placement_possible=true`. Change replicas to seven while nodes remain six. Expect that telemetry to become false as well as the three-replica target failing. A successful register write with impossible placement is a useful counterexample to “valid code means valid configuration.”
+
+Set replicas to one and explain what redundancy remains. Put three imagined copies in one rack and describe the correlated-failure risk without changing the numeric count. Finally define an actual placement and acknowledgement contract. Completing the lab establishes the virtual profile; real durability and availability require the additional observations and implementation just described.
+
+## Try this in the terminal beside the documentation
+
+Read the prerequisite explanation and register table before running. These two complete reference programs produce the same target MMIO values. Use the language switch above the workspace to select C or RV32I assembly, load the matching example, then press Run. Inspect **State / mmio** and the component telemetry.
+
+```c run:reference
+#include <stdio.h>
+int main(void) {
+    mmio_write(0xF000, 6); // nodes
+    mmio_write(0xF004, 3); // replicas
+    mmio_write(0xF008, 1); // enabled
+    printf("Configuration written. Inspect MMIO and test checks.\n");
+    return 0;
+}
+```
+
+```assembly run:reference
+lui t0,15
+li t1,6
+sw t1,0(t0)
+li t1,3
+sw t1,4(t0)
+li t1,1
+sw t1,8(t0)
+li a7,10
+ecall
+```
+
+Both references should pass all three address targets in the table. The starter intentionally misses one target. Passing records the configured **virtual profile**; use the guided mutations below to distinguish encoding, domain constraints and measured physical behavior. Each run starts with fresh register state.
+
 ## What this component does
 A data centre combines compute, storage, networks, power, and cooling. Replication places multiple copies of data so one failed component need not destroy availability. Its usefulness depends on failure independence and consistency rules; three copies on one physical disk do not provide three independent failure domains.
 

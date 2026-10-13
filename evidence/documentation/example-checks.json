@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "lesson_examples": 41,
+  "lab_reference_examples": 26,
+  "intentional_lab_failures": 26,
+  "documented_programs": 98,
+  "intentional_error_experiments": 6
+}

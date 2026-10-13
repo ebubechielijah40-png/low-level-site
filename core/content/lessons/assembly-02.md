@@ -1,3 +1,51 @@
+## Before masks: choose the operation's interpretation
+
+You need [register aliases and encoding](/learn/assembly/1/) and [fixed-width ALU rules](/learn/machine/4/). Bits do not carry a universal signedness tag. An operation selects how they are interpreted. That is why comparison and shift instructions need distinctions even though ADD keeps the same low bits for signed and unsigned readings.
+
+The original program starts at binary `011`, ORs `100` to obtain `111`, then ANDs with the 32-bit pattern for -3, `fffffffd`, to obtain `101`. Only bit one is zero in that mask. Every other bit is preserved by AND with one. The final result is five. Clearing a bit is a mask operation, not subtracting its numeric weight unconditionally: subtraction would borrow if the bit were already clear.
+
+For a selected mask M: `value | M` sets its selected bits, `value & ~M` clears them, `value ^ M` toggles them, and `value & M` tests the selected positions. The final test result is a masked integer, not necessarily the Boolean integer one. Convert it to a Boolean comparison when that is what your API promises.
+
+## Try signed and unsigned comparison side by side
+
+```assembly run:comparison
+li t0,-1
+li t1,0
+slt t2,t0,t1
+sltu t3,t0,t1
+mv a0,t2
+li a7,1
+ecall
+mv a0,t3
+li a7,1
+ecall
+li a7,10
+ecall
+```
+
+Try this in the terminal beside the documentation. Expect console `10`, x7=1, and x28=0. The two prints have no separator. The signed comparison asks whether -1<0, which is true. The unsigned comparison asks whether 4294967295<0, which is false. Inputs are unchanged between comparisons; only the interpretation rule differs.
+
+Logical right shift of `ffffffff` by one produces `7fffffff`; arithmetic right shift preserves the leading one and produces `ffffffff`. Before using a shift for division, consider negative inputs and rounding rules. Before applying a register mask to a device, read its access semantics: write-one-to-clear and reserved-bit rules can make ordinary read-modify-write unsuitable. [Device register contracts](/learn/device/1/) explain that boundary in detail.
+
+## Try this in the terminal beside the documentation
+
+The following is a complete program for this page's engine. Load it into the terminal beside this explanation, predict the result, then press Run. Open **State** for final values, **Trace** for recorded execution, and **Encoding** for emitted bytes when this engine supplies them.
+
+```assembly run:reference
+li t0,3
+ori t1,t0,4
+andi t1,t1,-3
+mv a0,t1
+li a7,1
+ecall
+li a7,10
+ecall
+```
+
+Expected result: Console: `5`.
+
+The fixed reference checks describe this program. A deliberate mutation can run correctly while failing those original checks; compare it with your new prediction. **Restore draft** restores the source present before the most recent example load.
+
 ## Bits can have multiple numeric readings
 A 32-bit pattern represents an unsigned number from 0 through 4294967295. Two's-complement signed interpretation represents -2147483648 through 2147483647. The pattern ffffffff is the unsigned maximum and signed -1. Neither reading changes the physical bits.
 

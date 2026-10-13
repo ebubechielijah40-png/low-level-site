@@ -13,7 +13,7 @@ class Command(BaseCommand):
         for order,s in enumerate(systems,1):
             system,_=HardwareSystem.objects.update_or_create(slug=s['slug'],defaults={k:s[k] for k in ('name','category','description')}|{'unlock_order':order})
             for index,l in enumerate(s['labs'],1):
-                language=Language.objects.filter(slug=l['language_slug']).first()
+                language=Language.objects.filter(slug=l['language_slug'],is_archived=False).first()
                 defaults={k:l[k] for k in ('title','description','component','starter_code_c','starter_code_asm','expected_state')}
                 defaults['instructions']=(root/'lessons'/l['file']).read_text();defaults['language']=language
                 HardwareChallenge.objects.update_or_create(system=system,order=index,defaults=defaults);count+=1

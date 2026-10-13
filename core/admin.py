@@ -4,13 +4,14 @@ from .models import (Language,Lesson,UserProgress,LessonCompletion,HardwareSyste
 
 @admin.register(Language)
 class LanguageAdmin(admin.ModelAdmin):
-    list_display=('name','order','engine','slug')
+    list_display=('name','order','engine','slug','is_archived')
+    list_filter=('is_archived',)
     ordering=('order',)
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display=('title','language','order','minutes')
-    list_filter=('language',)
+    list_display=('title','language','order','minutes','is_archived')
+    list_filter=('language','is_archived')
     search_fields=('title','content')
 
 @admin.register(HardwareChallenge)

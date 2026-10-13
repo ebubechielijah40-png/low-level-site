@@ -1,3 +1,49 @@
+## Before assembly: keep the machine model
+
+Complete or review [machine control flow](/learn/machine/6/). The learning path keeps RV32I throughout these first two tracks. Assembly changes how you write instructions, not their architectural effects. The same word can be expressed as a mnemonic, hexadecimal, or binary, and the execution model should agree.
+
+The assembler first determines instruction and data locations, then resolves symbolic references and emits words. This matters because a label cannot be resolved by assuming one source line equals four bytes. Blank lines, comments, and labels emit none. A pseudo instruction may emit more than one word. Data directives emit data bytes, and those bytes are not automatically safe instruction targets.
+
+## Work from source to encoding to state
+
+`li t0,21` means load an immediate into x5. For this small constant the emitted instruction is `addi x5,x0,21`, word `01500293`. `add t1,t0,t0` uses x6 as destination and x5 for both inputs; it computes 42 without changing x5. `mv a0,t1` is ADDI with immediate zero. The instruction name MV is an assembler convenience; the processor executes the resulting ADDI.
+
+Register aliases describe a conventional role, not a type. a0 and x10 are the same physical architectural register in this model. Nothing stops you from storing an address there, but a service expecting an integer will interpret its bits as that integer. Interfaces establish the meaning of the register contents at a boundary.
+
+## Try a pseudo instruction that needs two words
+
+```assembly run:large-immediate
+li t0,4096
+addi t1,t0,1
+mv a0,t1
+li a7,1
+ecall
+li a7,10
+ecall
+```
+
+Try this in the terminal beside the documentation and expect 4097. Open **Encoding** and inspect the expansion of the first source line. A value outside ADDI's twelve-bit signed range needs a wider construction; the returned listing shows the emitted LUI/ADDI sequence. Moving a later label must account for those extra words. Open **Trace** to connect each emitted word to its register write.
+
+An assembler diagnoses spelling, unsupported instruction forms, unknown labels, and encoding bounds. It cannot determine that adding two valid registers implements the algorithm you intended. Compare a successful assembly with an independently predicted final state. This distinction will carry into C, where a parsed program can still express the wrong algorithm.
+
+## Try this in the terminal beside the documentation
+
+The following is a complete program for this page's engine. Load it into the terminal beside this explanation, predict the result, then press Run. Open **State** for final values, **Trace** for recorded execution, and **Encoding** for emitted bytes when this engine supplies them.
+
+```assembly run:reference
+li t0,21
+add t1,t0,t0
+mv a0,t1
+li a7,1
+ecall
+li a7,10
+ecall
+```
+
+Expected result: Console: `42`.
+
+The fixed reference checks describe this program. A deliberate mutation can run correctly while failing those original checks; compare it with your new prediction. **Restore draft** restores the source present before the most recent example load.
+
 ## Assembly adds names, not new hardware
 Machine code is the processor's encoding. Assembly is a textual way to describe those encodings. An assembler resolves mnemonics, registers, constants, and labels into bytes. The mnemonic `addi` is easier to edit than `00500293`, but both can describe the same instruction. The processor never reads the mnemonic itself.
 

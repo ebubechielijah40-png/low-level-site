@@ -1,6 +1,6 @@
 # Response-time and deployment update — 1 October 2026
 
-Prepared against `main` at `ba486026` in `ebubechielijah40-png/low-level-site`. The screenshot shows the upgraded interface on the supplied tunnel. Live browser navigation timed out here; a later HTTP attempt failed at this environment's proxy connection before reaching the site. This is not proof that the owner's site is down. These new changes have not been pushed or activated remotely.
+This report records the performance work prepared against `main` at `ba486026` in `ebubechielijah40-png/low-level-site`. The screenshot showed the interface on the development tunnel at the time. Direct browser navigation timed out and an HTTP attempt failed at the test network's proxy, so the running site's behavior was not verified by those checks. The performance update was subsequently pushed to GitHub; deployment status requires a separate revision check on the running server.
 
 ## Built changes
 
@@ -12,7 +12,7 @@ Prepared against `main` at `ba486026` in `ebubechielijah40-png/low-level-site`. 
 - Response headers expose application duration (`Server-Timing`) and running Git revision (`X-App-Revision`). Private pages, APIs and downloads use `private, no-store`.
 - Debug-off WhiteNoise serves compressed, hashed, immutable static assets. Fresh HTML references new hashes after an update. Gunicorn replaces public `runserver` use.
 - `window.bareMetalPerformance.snapshot()` holds diagnostics in this tab's memory: request time, application time, paint-opportunity estimates and supported event/long-task entries. It never uploads code or identities; navigation clears it and it retains 100 entries.
-- Upgrade/start scripts, exact tunnel configuration, private coherent SQLite backups, legacy completion repair, an optional systemd example, and GitHub verification make releases repeatable.
+- Upgrade/start scripts, exact tunnel configuration, private coherent SQLite backups, legacy completion repair, and an optional systemd example make releases repeatable.
 
 ## Measurements and evidence
 
@@ -33,25 +33,23 @@ Login leaves little room for network/paint in that budget. The site is not certi
 
 Passed: 167 Django tests; system/migration checks; all 33 lesson and 26 lab references; 26 intentional lab-target failures; development HTTP smoke; production HTTPS-proxy/secure-cookie/static/compression/cache checks; fresh/repeated upgrades; known legacy and already-renamed completion/index recovery; deduplication with retained audit rows; account preservation; owner-readable coherent backups; partial-schema rejection; JavaScript/shell checks.
 
-DOM checks pass using genuine Django pages and engine results, with jsdom mocking observers, canvas and network. They cover password eyes, pending state, lazy 200-row tables, refreshed results, tab reuse, reset, timeout recovery, local diagnostics, RAM telemetry, batched draws and buffer reuse. This is not pixel/layout/paint/INP proof. Chromium installation returned an unusable archive, and cloud browser navigation timed out. Actual browser/mobile/live latency remains unverified. The browser script records timings and screenshots when run in a working local browser. GitHub Actions has not run until this update is pushed.
+DOM checks pass using genuine Django pages and engine results, with jsdom mocking observers, canvas and network. They cover password eyes, pending state, lazy 200-row tables, refreshed results, tab reuse, reset, timeout recovery, local diagnostics, RAM telemetry, batched draws and buffer reuse. This is not pixel/layout/paint/INP proof. Chromium installation returned an unusable archive, and cloud browser navigation timed out. Actual browser/mobile/live latency remains unverified. The browser script records timings and screenshots when run in a working local browser. The repository currently has no GitHub Actions verification workflow.
 
-## Apply and push
+## Update the deployed checkout
 
-Save `Bare-Metal-Performance-Update.patch` to Downloads. Begin with your existing clean repository. These checks preserve local work and fail if it differs from the patch's base:
+Stop the running app, then update a clean checkout. The updater requires a fast-forward pull and preserves the private database:
 
 ```bash
 cd ~/low-level-site
 git status --short
-git pull --ff-only origin main
-git apply --check ~/Downloads/Bare-Metal-Performance-Update.patch
-git apply --index ~/Downloads/Bare-Metal-Performance-Update.patch
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python manage.py test --noinput
-git commit -m "Improve response times and deployment updates"
-git push origin main
+set -a
+source .env.deploy
+set +a
+bash tools/update_server.sh
+bash tools/start_server.sh
 ```
 
-If the patch check fails, keep the local changes and inspect the difference. Do not reset `.git` or the learner database. The patch changes the existing project in place and leaves the migration files intact.
+If the checkout contains uncommitted work, preserve it before updating. Do not reset the repository or learner database to resolve a failed pull. Check `X-App-Revision` after restarting to confirm the served commit.
 
 ## Activate the running tunnel
 
@@ -107,4 +105,4 @@ Run `tools/browser_smoke.cjs` on a disposable local development DB/server; it cr
 
 References: [Django deployment](https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/), [WhiteNoise](https://whitenoise.readthedocs.io/en/stable/django.html), [Gunicorn](https://gunicorn.org/reference/settings/), [Microsoft tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/security).
 
-The initial report remains the original upgrade's evidence; this follow-up adds observed results without inventing browser, publishing, kernel-boot or live deployment outcomes.
+These measurements describe the local test environment. They do not establish browser, native kernel boot, or live deployment performance.

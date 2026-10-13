@@ -4,9 +4,11 @@ Follow the exact Linux or PowerShell commands in README. Python 3.12 is the reco
 
 ## Existing installation
 
-Keep this repository's complete migration history, ending at `0006_alter_language_options_hardwarechallenge_component_and_more`. A different old branch used other 0005/0006 files: do not mix those files into this graph or fake all migrations.
+Keep this repository's complete migration history, now ending at `0007_archive_legacy_curriculum`. A different old branch used other 0005/0006 files: do not mix those files into this graph or fake all migrations.
 
-Stop the app server, load your deployment environment, then run `python manage.py prepare_deployment`. It makes an owner-readable SQLite snapshot, handles the known existing completion-table/index collision, migrates, restores unique valid completions, seeds teaching, collects versioned compressed assets, and checks Django. It retains old completion rows and refuses unrelated/partial schemas. See [the follow-up guide](PERFORMANCE_AND_DEPLOYMENT.md). Seeds update the supplied catalogue and preserve unrelated custom lessons.
+Stop the app server, load your deployment environment, then run `python manage.py prepare_deployment`. It makes an owner-readable SQLite snapshot, handles the known existing completion-table/index collision, migrates, restores unique valid completions, seeds teaching, collects versioned compressed assets, and checks Django. It retains old completion rows and refuses unrelated/partial schemas. See [the follow-up guide](PERFORMANCE_AND_DEPLOYMENT.md).
+
+The current catalogue is the published curriculum. Reseeding archives tracks and lessons outside it, including old machine-language/x86 lessons and extra historical C rows. Rows and private work are retained, but archived teaching is removed from navigation, progress totals, and executable lesson contexts; old links return to the learning path. Custom material must be added to the authored catalogue to remain published across deployments. Migration 0007 adds the archive flags; it does not drop user data.
 
 The attached database had no languages, lessons, lesson progress, or hardware progress. It had six systems and thirteen legacy hardware exercises. Those system/order identities are reused for the new configurations. The archive intentionally excludes the user's original database and account. Historical language counters in other installations remain present but are not treated as individual lesson-completion evidence. If other installations have old hardware-completion records, review them when replacing the exercises: their historical task meaning may differ from the new target.
 
@@ -21,7 +23,7 @@ export DJANGO_ALLOWED_HOSTS=your-host.example
 export DJANGO_HTTPS=1
 ```
 
-Use the included Linux Gunicorn setup behind HTTPS and WhiteNoise for collected static assets. Keep the same private secret across restarts. `bash tools/start_server.sh` starts the service with its Git hash in `X-App-Revision`. The GitHub workflow tests pushes; it does not restart the owner's computer.
+Use the included Linux Gunicorn setup behind HTTPS and WhiteNoise for collected static assets. Keep the same private secret across restarts. `bash tools/start_server.sh` starts the service with its Git hash in `X-App-Revision`. A Git push does not restart a running service; run the deployment update on that machine.
 
 ```bash
 python manage.py collectstatic --noinput
@@ -42,7 +44,8 @@ Full native-kernel hosting similarly needs a compatible loader and a separate br
 
 ## Troubleshooting
 
-- Empty language list: run seed_lessons, then seed_hardware.
+- Empty or stale language list: run seed_lessons, then seed_hardware after migrating. A Git push alone does not refresh database lesson content.
+- x86 bytes in a C terminal, or duplicate old lessons: migrate through 0007 and reseed. Verify the language path shows seven current tracks and 41 lessons; historical work remains in the database.
 - ModuleNotFoundError: use the interpreter inside the virtual environment and install requirements there.
 - Invalid host: add your actual hostname through DJANGO_ALLOWED_HOSTS; localhost is included for development.
 - Missing editor styling: confirm `/static/core/css/style.css` is served and collect static for production. The site uses local files, not CDN assets.

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import IntegrityError
-from django.db.models import Count, Prefetch
+from django.db.models import Count, Prefetch, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -22,7 +22,7 @@ from .runtime.common import RunError
 
 
 def landing(request):
-    return render(request,'core/landing.html',{'languages':Language.objects.annotate(lesson_count=Count('lessons'))})
+    return render(request,'core/landing.html',{'languages':Language.objects.filter(is_archived=False).annotate(lesson_count=Count('lessons',filter=Q(lessons__is_archived=False)))})
 
 def login_view(request):
     if request.user.is_authenticated:return redirect('dashboard')
@@ -50,9 +50,9 @@ def logout_view(request):
     logout(request);return redirect('landing')
 
 def track_context(user):
-    done=set(LessonCompletion.objects.filter(user=user).values_list('lesson_id',flat=True))
-    tracks=list(Language.objects.prefetch_related(Prefetch('lessons',
-        queryset=Lesson.objects.only('id','language_id','order','title','summary'))))
+    done=set(LessonCompletion.objects.filter(user=user,lesson__is_archived=False,lesson__language__is_archived=False).values_list('lesson_id',flat=True))
+    tracks=list(Language.objects.filter(is_archived=False).prefetch_related(Prefetch('lessons',
+        queryset=Lesson.objects.filter(is_archived=False).only('id','language_id','order','title','summary'))))
     for t in tracks:
         ls=list(t.lessons.all());t.lesson_count=len(ls);t.completed=sum(l.pk in done for l in ls)
         t.percentage=round(t.completed/max(1,len(ls))*100)
@@ -76,14 +76,20 @@ def language_list(request):
 @login_required
 def language_detail(request,pk):
     language=get_object_or_404(Language,pk=pk)
+    if language.is_archived:
+        messages.info(request,'This historical track has been replaced. Your saved work is retained.')
+        return redirect('language_list')
     completed_ids=set(LessonCompletion.objects.filter(user=request.user,lesson__language=language).values_list('lesson_id',flat=True))
-    return render(request,'core/language_detail.html',{'language':language,'lessons':language.lessons.only('id','language_id','title','order','summary','minutes'),
+    return render(request,'core/language_detail.html',{'language':language,'lessons':language.lessons.filter(is_archived=False).only('id','language_id','title','order','summary','minutes'),
             'completed_ids':completed_ids,'configurations':language.configurations.select_related('system').all(),'active_nav':'languages'})
 
 @login_required
 def lesson_detail(request,pk=None,language_pk=None,lesson_order=None):
     lesson=get_object_or_404(Lesson.objects.select_related('language'),pk=pk) if pk else get_object_or_404(Lesson,language_id=language_pk,order=lesson_order)
-    lessons=list(lesson.language.lessons.only('id','language_id','title','order'));key=f'lesson:{lesson.pk}'
+    if lesson.is_archived or lesson.language.is_archived:
+        messages.info(request,'This historical lesson has been replaced. Your saved draft is retained.')
+        return redirect('language_list')
+    lessons=list(lesson.language.lessons.filter(is_archived=False).only('id','language_id','title','order'));key=f'lesson:{lesson.pk}'
     draft=CodeDraft.objects.filter(user=request.user,key=key).first()
     done=set(LessonCompletion.objects.filter(user=request.user).values_list('lesson_id',flat=True))
     return render(request,'core/lesson_detail.html',{'lesson':lesson,'all_lessons':lessons,
@@ -96,9 +102,14 @@ def lesson_detail(request,pk=None,language_pk=None,lesson_order=None):
 def try_it(request,pk):return redirect('lesson_detail',pk=pk)
 
 @login_required
+def catalog_lesson(request,slug,order):
+    lesson=get_object_or_404(Lesson,language__slug=slug,language__is_archived=False,is_archived=False,order=order)
+    return redirect('lesson_detail',pk=lesson.pk)
+
+@login_required
 @require_POST
 def lesson_complete(request,pk):
-    lesson=get_object_or_404(Lesson,pk=pk);LessonCompletion.objects.get_or_create(user=request.user,lesson=lesson)
+    lesson=get_object_or_404(Lesson,pk=pk,is_archived=False,language__is_archived=False);LessonCompletion.objects.get_or_create(user=request.user,lesson=lesson)
     p,_=UserProgress.objects.get_or_create(user=request.user,language=lesson.language)
     p.current_lesson=max(p.current_lesson,lesson.order);p.save(update_fields=['current_lesson'])
     messages.success(request,'Lesson marked complete. You can revisit it at any time.')
@@ -140,7 +151,7 @@ def hardware_complete(request,slug,challenge_pk):
 def playground(request):
     engine=request.GET.get('lang','c')
     if engine not in ENGINES:engine='c'
-    first=Lesson.objects.filter(language__engine=engine).order_by('order').first()
+    first=Lesson.objects.filter(language__engine=engine,language__is_archived=False,is_archived=False).order_by('language__order','order').first()
     starter=first.starter_code if first else DEFAULT_BOOT if engine=='boot' else 'int main(void){return 0;}'
     key=f'free:{engine}';draft=CodeDraft.objects.filter(user=request.user,key=key).first()
     return render(request,'core/playground.html',{'engine':engine,'starter_code':starter,'editor_code':draft.code if draft else starter,
@@ -193,7 +204,7 @@ def execute_api(request):
     if context in ('lesson','lab') and (isinstance(pk,bool) or not isinstance(pk,(int,str)) or not str(pk).isdigit() or int(pk)<1):
         return JsonResponse({'error':'Use a positive numeric context ID.'},status=400)
     if context=='lesson':
-        lesson=get_object_or_404(Lesson,pk=pk)
+        lesson=get_object_or_404(Lesson,pk=pk,is_archived=False,language__is_archived=False)
         if lesson.language.engine!=engine:return JsonResponse({'error':'Use the lesson language.'},status=400)
         expected=lesson.expected_state
     elif context=='lab':

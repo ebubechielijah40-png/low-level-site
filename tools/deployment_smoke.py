@@ -45,7 +45,7 @@ with tempfile.TemporaryDirectory(prefix='bare-metal-upgrade-') as folder:
         backups=tmp/scenario
         run(case,'prepare_deployment','--backup-dir',str(backups));run(case,'prepare_deployment','--backup-dir',str(backups))
         with sqlite3.connect(db) as con:
-            assert con.execute('SELECT COUNT(*) FROM core_lesson').fetchone()[0]==33
+            assert con.execute('SELECT COUNT(*) FROM core_lesson WHERE is_archived=0').fetchone()[0]==41
             assert con.execute('SELECT COUNT(*) FROM core_hardwarechallenge').fetchone()[0]==13
             assert con.execute('PRAGMA foreign_key_check').fetchall()==[]
             if scenario!='fresh':

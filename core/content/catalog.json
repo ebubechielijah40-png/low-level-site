@@ -270,6 +270,113 @@
     ]
   },
   {
+    "name": "Device foundations",
+    "slug": "device",
+    "engine": "c",
+    "subtitle": "From code to a device contract",
+    "description": "The bridge between language knowledge and configuration: registers, lifecycle, timing, DMA, protocols, resource limits, digital state and ideal quantum states. Practice with bounded C models.",
+    "lessons": [
+      {
+        "title": "Address spaces and register contracts",
+        "summary": "Distinguish RAM, MMIO, mapping, permissions and register side effects before making a write.",
+        "file": "device-01.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    mmio_write(0xF000, 512);\n    unsigned int control = mmio_read(0xF004);\n    control = control | 1U;\n    mmio_write(0xF004, control);\n    printf(\"capacity=%u control=%u\\n\", mmio_read(0xF000), mmio_read(0xF004));\n    return 0;\n}\n",
+        "example_output": "capacity=512 control=1\n",
+        "expected_state": {
+          "output": "capacity=512 control=1",
+          "mmio": {
+            "61440": 512,
+            "61444": 1
+          }
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Configuration lifecycle, acknowledgement and timeout",
+        "summary": "Validate a profile, follow a bounded mock activation protocol and distinguish requests from completion.",
+        "file": "device-02.md",
+        "starter_code": "#include <stdio.h>\nvoid poll_device(int polls) {\n    if (polls == 3) {\n        mmio_write(0xF00C, 1);\n    }\n}\nint main(void) {\n    int capacity = 512;\n    int polls = 0;\n    unsigned int ready = 0U;\n    if (capacity < 256 || capacity > 1024) {\n        puts(\"invalid capacity\");\n        return 0;\n    }\n    mmio_write(0xF004, 0);\n    mmio_write(0xF000, capacity);\n    mmio_write(0xF008, 1);\n    mmio_write(0xF004, 1);\n    while (polls < 4 && ready == 0U) {\n        polls = polls + 1;\n        poll_device(polls);\n        ready = mmio_read(0xF00C) & 1U;\n    }\n    printf(\"ready=%u polls=%d\\n\", ready, polls);\n    return 0;\n}\n",
+        "example_output": "ready=1 polls=3\n",
+        "expected_state": {
+          "output": "ready=1 polls=3",
+          "mmio": {
+            "61440": 512,
+            "61444": 1,
+            "61448": 1,
+            "61452": 1
+          }
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Clocks, electrical timing and resource budgets",
+        "summary": "Derive cycles from timing constraints and connect digital requests to physical operating limits.",
+        "file": "device-03.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    int cycle_ns = 5;\n    int required_ns = 13;\n    int cycles = (required_ns + cycle_ns - 1) / cycle_ns;\n    int supplied_ns = cycles * cycle_ns;\n    int load_watts = 6000;\n    int cooling_watts = 8000;\n    printf(\"cycles=%d supplied_ns=%d headroom_watts=%d\\n\",\n           cycles, supplied_ns, cooling_watts - load_watts);\n    return 0;\n}\n",
+        "example_output": "cycles=3 supplied_ns=15 headroom_watts=2000\n",
+        "expected_state": {
+          "output": "cycles=3 supplied_ns=15 headroom_watts=2000"
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Interrupts, DMA, caches and ownership",
+        "summary": "Reason about event acknowledgement, buffer publication, DMA addresses and synchronization boundaries.",
+        "file": "device-04.md",
+        "starter_code": "#include <stdio.h>\nunsigned int acknowledge(unsigned int pending, unsigned int mask) {\n    return pending & ~mask;\n}\nint main(void) {\n    unsigned int pending = 3U;\n    unsigned int after = acknowledge(pending, 1U);\n    int cpu_buffer[2] = {7, 9};\n    int device_view[2] = {0, 0};\n    device_view[0] = cpu_buffer[0];\n    device_view[1] = cpu_buffer[1];\n    int descriptor_valid = 1;\n    printf(\"pending=%u after_ack=%u dma_sum=%d valid=%d\\n\",\n           pending, after, device_view[0] + device_view[1], descriptor_valid);\n    return 0;\n}\n",
+        "example_output": "pending=3 after_ack=2 dma_sum=16 valid=1\n",
+        "expected_state": {
+          "output": "pending=3 after_ack=2 dma_sum=16 valid=1"
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Buffers, byte protocols, storage and networks",
+        "summary": "Keep field encoding, block addressing, MTU, payload and buffer length contracts distinct.",
+        "file": "device-05.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    unsigned int value = 4660U;\n    unsigned int high = (value >> 8) & 255U;\n    unsigned int low = value & 255U;\n    unsigned int decoded = (high << 8) | low;\n    int bytes = 1536;\n    int block_bytes = 512;\n    int blocks = (bytes + block_bytes - 1) / block_bytes;\n    int mtu = 1500;\n    int ip_header = 20;\n    int transport_header = 20;\n    printf(\"high=%u low=%u decoded=%u blocks=%d payload=%d\\n\",\n           high, low, decoded, blocks, mtu - ip_header - transport_header);\n    return 0;\n}\n",
+        "example_output": "high=18 low=52 decoded=4660 blocks=3 payload=1460\n",
+        "expected_state": {
+          "output": "high=18 low=52 decoded=4660 blocks=3 payload=1460"
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Queues, parallelism and failure domains",
+        "summary": "Calculate resource budgets and distinguish requested counts from throughput, durability and availability.",
+        "file": "device-06.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    int workers = 8;\n    int worker_mib = 32;\n    int queue_items = 64;\n    int item_bytes = 1024;\n    int nodes = 6;\n    int replicas = 3;\n    int placement_possible = replicas > 0 && replicas <= nodes;\n    int tolerance = replicas - 1;\n    printf(\"worker_mib=%d queue_bytes=%d placement=%d copy_loss_tolerance=%d\\n\",\n           workers * worker_mib, queue_items * item_bytes,\n           placement_possible, tolerance);\n    return 0;\n}\n",
+        "example_output": "worker_mib=256 queue_bytes=65536 placement=1 copy_loss_tolerance=2\n",
+        "expected_state": {
+          "output": "worker_mib=256 queue_bytes=65536 placement=1 copy_loss_tolerance=2"
+        },
+        "minutes": 45
+      },
+      {
+        "title": "State machines, clocked logic and reset",
+        "summary": "Build a controller transition contract and understand what sequential hardware needs beyond a truth table.",
+        "file": "device-07.md",
+        "starter_code": "#include <stdio.h>\nint next_state(int state, int start, int complete, int ack) {\n    if (state == 0 && start) {\n        return 1;\n    }\n    if (state == 1 && complete) {\n        return 2;\n    }\n    if (state == 2 && ack) {\n        return 0;\n    }\n    return state;\n}\nint main(void) {\n    int state = 0;\n    state = next_state(state, 1, 0, 0);\n    printf(\"start=%d \", state);\n    state = next_state(state, 0, 1, 0);\n    printf(\"complete=%d \", state);\n    state = next_state(state, 0, 0, 1);\n    printf(\"ack=%d\\n\", state);\n    return 0;\n}\n",
+        "example_output": "start=1 complete=2 ack=0\n",
+        "expected_state": {
+          "output": "start=1 complete=2 ack=0"
+        },
+        "minutes": 45
+      },
+      {
+        "title": "Quantum states and the limits of a gate profile",
+        "summary": "Derive the two ideal preparations and separate amplitudes, probabilities, expected counts and physical control.",
+        "file": "device-08.md",
+        "starter_code": "#include <stdio.h>\nint main(void) {\n    unsigned int gate_mask = 3U;\n    int shots = 1024;\n    int hadamard = (gate_mask & 1U) != 0U;\n    int controlled_x = (gate_mask & 2U) != 0U;\n    int expected_00 = shots;\n    int expected_01 = 0;\n    int expected_11 = 0;\n    if (hadamard) {\n        expected_00 = shots / 2;\n        if (controlled_x) {\n            expected_11 = shots / 2;\n        } else {\n            expected_01 = shots / 2;\n        }\n    }\n    printf(\"expected_00=%d expected_01=%d expected_11=%d\\n\",\n           expected_00, expected_01, expected_11);\n    return 0;\n}\n",
+        "example_output": "expected_00=512 expected_01=0 expected_11=512\n",
+        "expected_state": {
+          "output": "expected_00=512 expected_01=0 expected_11=512"
+        },
+        "minutes": 45
+      }
+    ]
+  },
+  {
     "name": "Rust",
     "slug": "rust",
     "engine": "rust",

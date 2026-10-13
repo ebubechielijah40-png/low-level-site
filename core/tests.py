@@ -126,7 +126,7 @@ class WorkspaceTests(TestCase):
     def setUp(self):cache.clear();self.client.force_login(self.user)
     def post_json(self,path,data):return self.client.post(path,json.dumps(data),content_type='application/json')
     def test_seeds_are_idempotent(self):
-        before=(Language.objects.count(),Lesson.objects.count(),HardwareChallenge.objects.count());call_command('seed_lessons',verbosity=0);call_command('seed_hardware',verbosity=0);self.assertEqual(before,(6,33,13));self.assertEqual(before,(Language.objects.count(),Lesson.objects.count(),HardwareChallenge.objects.count()))
+        before=(Language.objects.count(),Lesson.objects.count(),HardwareChallenge.objects.count());call_command('seed_lessons',verbosity=0);call_command('seed_hardware',verbosity=0);self.assertEqual(before,(7,41,13));self.assertEqual(before,(Language.objects.count(),Lesson.objects.count(),HardwareChallenge.objects.count()))
     def test_all_pages_render(self):
         paths=['/','/dashboard/','/languages/','/hardware/','/os/']+[f'/playground/?lang={x}' for x in ('c','assembly','machine','rust','verilog','boot')]
         paths += [f'/languages/{l.pk}/' for l in Language.objects.all()]+[f'/lessons/{l.pk}/' for l in Lesson.objects.all()]

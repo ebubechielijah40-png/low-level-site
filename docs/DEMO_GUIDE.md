@@ -3,7 +3,7 @@
 A ten-minute demonstration should establish behaviour with observations, not directory counts.
 
 1. **Create a workspace.** Show the password eye controls, validation, and coherent terminal styling. Explain that each account owns its drafts and boot images.
-2. **Show the path.** Machine code uses the same RV32I architecture as assembly. C adds storage and function abstractions, Rust adds selected access rules, and Verilog introduces logic descriptions. The OS track states its x86 architecture switch.
+2. **Show the path.** Machine code and assembly share RV32I. C adds object/function abstractions. The eight device-foundation lessons teach the missing register, lifecycle, timing, ownership and protocol knowledge. Rust, Verilog and OS foundations provide focused branches; the OS track states its x86 architecture switch.
 3. **Decode one instruction.** Open the first machine lesson, predict x5 = 5, run, inspect the register, and find its word in Trace. Explain why words and byte order differ.
 4. **Show the integrated lesson.** Open C arrays, read the explanation beside the editor, run its length/sum example, then change the loop to visit index four. Show the bounds error. Restore the starter.
 5. **Test a component.** Select RAM in the personal-computer model. Rotate and zoom it. Run the deliberately incomplete configuration, fix the parity request, and show all three target checks. Explain why these are virtual registers.

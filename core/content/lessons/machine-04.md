@@ -1,3 +1,46 @@
+## Before the ALU: identify what is read and written
+
+Review [register dependencies](/learn/machine/3/). An ALU operation takes input bit patterns and an operation selector, then produces a result. The architectural rule specifies where the result is stored. A possible physical implementation uses adders, gates, and multiplexers; the instruction contract specifies behavior without prescribing a particular transistor arrangement or pipeline.
+
+For an R-type instruction, opcode is `0x33`, rd occupies bits 11-7, rs1 bits 19-15, and rs2 bits 24-20. ADD uses funct3=0 and funct7=0. SUB uses the same funct3 with funct7=32. Therefore the difference between `006283b3` and `40628433` includes both the operation selector and destination register. Decode each changed field instead of assuming all differences identify only subtraction.
+
+## Derive the final state without running
+
+The two initial immediate instructions make x5=20 and x6=7. ADD writes x7=27. SUB reads the same original inputs and writes x8=13. Neither modifies x5 or x6. Write four rows in your prediction table: x5=20, x6=7, x7=27, x8=13. Checking only x7 leaves operand preservation and subtraction untested.
+
+The arithmetic is modulo 2^32 for these RV32I register operations. If an intermediate mathematical sum exceeds that range, the stored pattern keeps its low bits. A signed or unsigned comparison later interprets that same pattern according to its own instruction. RV32I ADD does not raise a global signed-overflow flag or update an x86-style shared condition-code register.
+
+## Try a boundary that has an independent answer
+
+Load this complete program into the terminal beside the explanation. The mathematical intermediate is 2^32, whose low 32 bits are zero.
+
+```machine run:alu-wrap
+fff00293
+00100313
+006283b3
+00000073
+```
+
+Expect x5=4294967295, x6=1, x7=0. That result is evidence about the instruction's fixed-width rule. It is not permission to rely on signed overflow in C. The C track separates language rules from machine operations explicitly.
+
+For the original example, derive `sub x8,x6,x5` as `40530433`: expect x8=4294967283 in the unsigned view, which corresponds to signed -13. A low-four-bit mask of the sum is `27 & 15 = 11`. State why the mask preserves selected bit positions and why subtracting a number is not equivalent to clearing its corresponding bits.
+
+## Try this in the terminal beside the documentation
+
+The following is a complete program for this page's engine. Load it into the terminal beside this explanation, predict the result, then press Run. Open **State** for final values, **Trace** for recorded execution, and **Encoding** for emitted bytes when this engine supplies them.
+
+```machine run:reference
+01400293
+00700313
+006283b3
+40628433
+00000073
+```
+
+Expected result: State / registers: `x7 = 27`, `x8 = 13`.
+
+The fixed reference checks describe this program. A deliberate mutation can run correctly while failing those original checks; compare it with your new prediction. **Restore draft** restores the source present before the most recent example load.
+
 ## State transitions, not hidden intention
 An arithmetic logic unit, or ALU, performs operations on fixed-width bit patterns. The ADD instruction reads two source registers and writes one destination. It does not erase either source. For `add x7, x5, x6`, x7 receives the sum of the old x5 and x6 values. The instruction works even if a source and destination are the same register because sources are read before the result is written.
 

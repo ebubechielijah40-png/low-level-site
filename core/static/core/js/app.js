@@ -88,6 +88,22 @@
       }catch{q('#draft-status').textContent='Saved locally · offline';}
     }
     function changed(){pending=true;lines();q('#draft-status').textContent='Unsaved changes';try{localStorage.setItem(key,JSON.stringify({code:editor.value,pending:true}));}catch{}clearTimeout(saveTimer);saveTimer=setTimeout(save,900);}
+    let beforeExample=null;
+    qa('[data-load-example]').forEach(button=>{
+      if(button.dataset.engine!==terminal.dataset.engine){
+        button.disabled=true;button.textContent=`Use ${button.dataset.engine==='assembly'?'RV32I assembly':button.dataset.engine} terminal`;
+        return;
+      }
+      button.addEventListener('click',()=>{
+        beforeExample=editor.value;editor.value=button.closest('.code-example').querySelector('code').textContent;
+        changed();q('#restore-example').hidden=false;editor.focus();
+        if(matchMedia('(max-width: 920px)').matches)terminal.scrollIntoView({block:'start',behavior:'auto'});
+      });
+    });
+    q('#restore-example').addEventListener('click',()=>{
+      if(beforeExample!==null){editor.value=beforeExample;beforeExample=null;changed();}
+      q('#restore-example').hidden=true;editor.focus();
+    });
     editor.addEventListener('input',changed);editor.addEventListener('click',position);editor.addEventListener('keyup',position);editor.addEventListener('scroll',()=>q('#line-numbers').scrollTop=editor.scrollTop);
     editor.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const a=editor.selectionStart,z=editor.selectionEnd;editor.setRangeText('    ',a,z,'end');changed();}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();q('#run-code').click();}});
     q('#reset-code').addEventListener('click',()=>{editor.value=starter;changed();q('#run-status').textContent='RESET';q('#run-status').className='run-status';q('#output').textContent='Starter restored. Run to inspect it.';q('#checks').replaceChildren();lastResult=null;renderedPanels.clear();q('#run-metric').textContent='No run yet';for(const name of ['state','trace','encoding'])q(`#result-${name}`).replaceChildren(el('p','Run the starter to inspect its result.','muted'));document.dispatchEvent(new Event('baremetal:reset'));});

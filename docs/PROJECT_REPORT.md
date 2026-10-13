@@ -1,15 +1,15 @@
 # Bare Metal
 ## Design and implementation of an integrated environment for learning and applying low-level programming languages
 
-Technical final-year project report · 1 October 2026
+Technical final-year project report · initial implementation with documentation update, 13 October 2026
 
-This records the initial upgrade. The [follow-up](PERFORMANCE_AND_DEPLOYMENT.md) adds production serving, repeatable database upgrades, 167 passing Django tests and measured response times. Browser/public-network speed and native kernel boot remain unverified.
+The initial upgrade was followed by [production and performance work](PERFORMANCE_AND_DEPLOYMENT.md) and the [documentation/configuration update](DOCUMENTATION_UPGRADE_REPORT.md). The current site has seven tracks, 41 lessons, 13 configuration guides and 98 runnable documentation programs; the recorded suite passed 287 tests. All original guides now include deeper state/contract reasoning and worked experiments, and eight device-foundation lessons cover the knowledge missing between a language tutorial and configuration. Browser/public-network speed, physical-device work and native kernel boot remain unverified.
 
 ## Abstract
 
 Bare Metal continues the supplied CL-fromgithub Django project and turns its disconnected lesson pages and incomplete execution flow into an integrated learning environment. The learner reads an authored explanation beside an editable terminal, executes a supported program, and inspects output, virtual machine state, traces, and instruction bytes. A focused progression begins with machine code and RV32I assembly, then introduces C, Rust, Verilog, and operating-system foundations. Hardware configuration labs associate documented virtual registers with selectable component models. A separate OS workspace stores, imports, downloads, and emulates per-user 512-byte x86 boot images.
 
-The upgrade contains 33 authored lessons, 13 hardware configurations, approximately 19,426 words of lesson/lab teaching, authentication with password visibility controls, individual lesson completion, private code drafts, and server-verified configuration targets. The recorded automated suite passed 163 tests. All authored reference examples passed, a real HTTP workflow passed, seven C reference outputs agreed with native GCC execution, and a freestanding kernel compiled and linked to ELF. Browser visual verification and native-kernel boot verification remain incomplete. The implemented runners are explicit educational subsets and simulations; no physical hardware control or arbitrary native-code hosting is claimed.
+The current upgrade contains 41 authored lessons, 13 hardware configurations, 98 complete documentation programs, authentication with password visibility controls, individual lesson completion, private code drafts, and server-verified configuration targets. The recorded automated suite passed 287 tests. All documented programs matched their declared results or intentional diagnostics; the real HTTP, production and deployment workflows passed, and seven authored C outputs agreed with native GCC execution. The freestanding kernel's earlier compile/link milestone remains distinct from native boot, which has not been verified. Browser visual verification remains incomplete. The implemented runners are explicit educational subsets and simulations; no physical hardware control or arbitrary native-code hosting is claimed.
 
 ## 1. Introduction and problem definition
 
@@ -67,8 +67,8 @@ A separate freestanding C example progresses to an assembly entry, stack, linker
 |---|---|---|
 | F01 | Authentication and visible passwords | Validated signup, login, per-field eye controls, POST logout |
 | F02 | Coherent dashboard | Next unmarked lesson, actual completion counts, ordered path, open system links |
-| F03 | Progressive authored teaching | 6 tracks, 33 lessons with worked reasoning, exercises, and failure experiments |
-| F04 | Practice beside documentation | Integrated source, Run/reset, console, state, trace, and encoding |
+| F03 | Progressive authored teaching | 7 tracks, 41 lessons, explicit prerequisites and device foundations |
+| F04 | Practice beside documentation | 98 runnable documentation programs, matching-engine load, draft restore, Run/reset, console, state, trace, and encoding |
 | F05 | Local execution | Same-origin bounded interpreters/emulators; no public runner/CDN dependency |
 | F06 | Open hardware configuration | 13 labs, no prerequisite gate, C and assembly variants, server target checks |
 | F07 | Component inspection | Selection, rotation, zoom, labels, associated configurations, last-run telemetry |
@@ -105,7 +105,7 @@ The C engine uses pycparser's syntax tree. RV32I combines a two-pass assembler w
 | CodeDraft | Unique user–workspace code, updated on autosave |
 | BootProject | User-owned source where available and exact stored sector bytes |
 
-The new migration extends rather than replaces the original 0001–0005 history. The attached source database and its existing account are excluded from the delivery archive. Seed commands rebuild authored content and can be rerun without duplicating the supplied catalogue.
+Migrations 0006 and 0007 extend rather than replace the original 0001–0005 history. Migration 0007 adds archive flags so stale historical teaching is retained as data while removed from published navigation, totals and executable lesson contexts. The attached source database and its existing account are excluded from the delivery archive. Seed commands update canonical tracks by slug and lesson order; custom teaching belongs in the catalogue to remain published across reseeding.
 
 ### 3.5 Bounds and trust
 
@@ -123,9 +123,9 @@ Rust and Verilog add relevant systems/hardware perspectives without broadening t
 
 ### 4.2 Authored teaching
 
-The machine and assembly tracks each have six lessons. C has eight, Rust four, Verilog four, and OS foundations five. Across lesson and lab files, approximately 19,426 authored words explain representation, encoding, byte order, arithmetic, branching, memory, calls, arrays, pointers, scopes, structures, device interfaces, access rules, gates, circuits, boot sectors, and kernel boundaries.
+The machine and assembly tracks each have six lessons. C has eight, device foundations eight, Rust four, Verilog four, and OS foundations five. Every original language and hardware guide has been expanded with prerequisites, causal reasoning, complete runnable programs, expected observations and controlled mutations. Device foundations add register/lifecycle/timing/DMA/protocol/resource knowledge, a clocked-state software model and the mathematics needed for the site's ideal two-qubit demonstrations. The detailed curriculum map states the narrow scope of each branch.
 
-A useful lesson includes a mechanism, worked prediction, observable result, controlled failure, and independent practice. File/word counts are only an inventory; the successful references and explicit explanations are the substantive evidence. Further exercises may intentionally produce a different result from the worked example's reference checks.
+A useful lesson includes a mechanism, worked prediction, observable result, controlled failure, and independent practice. Marked Markdown programs are loaded into the matching terminal without implicit execution and are tested directly from the authored source. File/word counts are only an inventory; the successful references and explicit explanations are the substantive evidence. Further experiments may intentionally produce a different result from the page's fixed reference checks.
 
 ### 4.3 Interface
 
@@ -149,9 +149,9 @@ The separate minikernel builds a statically linked ELF32 i386 executable with a 
 
 ### 5.1 Method and results
 
-Testing combines direct runtime behaviour, adverse inputs, application integration, ownership/CSRF checks, complete authored references, real HTTP requests, and an independent native C output comparison. The recorded Django suite passed **163 tests**. The page integration test rendered **82** page/language variants. The separate reference inventory passed **33** lesson examples and **26** configuration references, and confirmed **26** intentionally incomplete starters fail their targets while still executing valid code.
+Testing combines direct runtime behaviour, adverse inputs, application integration, ownership/CSRF checks, complete authored documentation, real HTTP requests, deployment upgrades, and an independent native C output comparison. The recorded Django suite passed **287 tests**. The page integration check renders all current lesson, track, system and configuration-language variants. The verifier passed **41** lesson examples, **26** configuration references and **98** documented programs, including **6** intentional diagnostics; it also confirmed **26** incomplete configuration starters fail their targets while executing valid code. These counts overlap rather than representing independent additive totals.
 
-The real HTTP check used a temporary database and exercised registration, cookies, CSRF, dashboard, lesson execution, RAM targets, boot save, exact image download, and emulated boot. Seven hosted-C lesson outputs matched GCC-native results. The freestanding kernel compiled and linked successfully. Migration consistency and local JavaScript syntax checks passed. Evidence files and reproducible commands are included.
+The real HTTP check used a temporary database and exercised registration, cookies, CSRF, dashboard, lesson execution, RAM targets, boot save, exact image download, and emulated boot. Production/static and fresh/legacy/repeated deployment checks passed. Seven hosted-C lesson outputs matched GCC-native results. The earlier freestanding kernel compile/link verification remains recorded. Migration consistency, JavaScript syntax and example load/restore DOM behavior passed. The current documentation report and evidence distinguish these checks from visual and physical validation.
 
 ### 5.2 What the evidence establishes
 
@@ -159,19 +159,17 @@ These results establish the defined examples and tested boundaries in the implem
 
 ### 5.3 Blocked and untested work
 
-Real-browser verification was blocked: there was no installed Playwright browser, the Chromium download was unusable, and the available cloud browser rejected the local address. Therefore no rendered screenshots, password-toggle browser result, model-control browser result, mobile visual check, or browser accessibility audit is claimed. A supplied script performs those interactions and records screenshots when run locally.
+Real-browser verification remains blocked: the current Playwright launch cannot find its Chromium executable. Earlier attempts also had an unusable download and a cloud-browser local-address rejection. No rendered application screenshot, mobile layout result, browser accessibility audit or paint measurement is claimed. DOM checks verify example load/restore, engine matching and existing event behavior; the supplied real-browser script must run with a browser installed to establish rendered behavior.
 
-QEMU and the GRUB rescue toolchain were unavailable, so the native ELF kernel has not been boot-verified. There has been no physical-device validation, user study, penetration test, load benchmark, distributed rate-limit validation, or public deployment.
+QEMU and the GRUB rescue toolchain were unavailable for the native ELF kernel, whose boot remains unverified. There has been no physical-device validation, user-learning study, penetration test, concurrent-load benchmark or distributed rate-limit validation. Local production timing was measured for 30 sequential small C requests, with loopback HTTP p95 31.02 ms and application p95 15.26 ms; this excludes WAN, browser and load. The owner previously used a development tunnel, but its current availability and this documentation update's deployed revision have not been verified.
 
 ### 5.4 Ordered next steps
 
-First run the supplied browser script on the user's local development installation and inspect its screenshots. Resolve any layout or interaction failure before presentation. Next boot the included native kernel with a compatible loader and capture the actual screen. Then conduct a small learner usability/understanding evaluation using fixed pre/post tasks and recorded observations; do not invent those outcomes in the report.
-
-If full native language or kernel hosting is required, implement separate isolated workers or a suitable browser emulator instead of adding host execution to Django views. Complete deployment hardening, quotas, backups, shared atomic rate limiting, and concurrency/resource evaluation before a public launch.
+Run the browser script on a disposable development installation and inspect desktop/mobile behavior. Boot the native kernel with a compatible loader and capture its actual output. Conduct a learner evaluation with fixed pre/post tasks and recorded observations. Full native language/kernel hosting needs separate isolated workers or a compatible browser emulator. Complete quotas, backups, shared atomic rate limiting and concurrency/security evaluation before a public launch.
 
 ## References
 
-Primary technical sources consulted on 1 October 2026. Teaching and implementation explanations are original; these are contextual references rather than reproduced book or manual passages.
+The initial primary references were consulted on 1 October 2026; the documentation update adds device I/O, DMA and C language-contract references. Teaching and implementation explanations are original; these are contextual references rather than reproduced book or manual passages. The curriculum map contains the additional technical source list.
 
 [1] RISC-V International. RV32I Base Integer Instruction Set. https://docs.riscv.org/reference/isa/unpriv/rv32.html
 
@@ -189,8 +187,14 @@ Primary technical sources consulted on 1 October 2026. Teaching and implementati
 
 [8] Django Software Foundation. Password management in Django. https://docs.djangoproject.com/en/5.2/topics/auth/passwords/
 
+[9] Linux kernel documentation. Bus-independent device accesses. https://docs.kernel.org/driver-api/device-io.html
+
+[10] Linux kernel documentation. Dynamic DMA mapping guide. https://docs.kernel.org/core-api/dma-api-howto.html
+
+[11] WG14. N1570 C working draft. https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf
+
 ## Deliverable inventory and provenance
 
-The package contains the continued Django source/migrations, authored curriculum and configuration files, local frontend assets, runtime engines, tests, reproduction/build scripts, native kernel source and verified ELF artifact, and the audit/report/setup/demo/memory documents. The original upload remains unchanged. Its SHA-256 is `3c4bdb8fdbe63c0bf2acfb9ae34db7e068fe4b64b3a10510fd238643768610b7`.
+The repository contains the continued Django app/migrations, curriculum/configurations, local frontend assets, runtime engines, tests, reproduction/build scripts, native kernel milestone, and public audit/report/setup/demo guides. The original input archive remains unchanged. Its SHA-256 is `3c4bdb8fdbe63c0bf2acfb9ae34db7e068fe4b64b3a10510fd238643768610b7`.
 
-No GitHub push, public publishing, or physical configuration occurred. PROJECT_MEMORY.md records the user's requirements, decisions, evidence, and limits as a resumable brief; it is not a claim that persistent chat memory was written.
+The documentation update was published to GitHub on 13 October 2026. A running deployment still requires a pull, database preparation and process restart; its active revision has not been verified.

@@ -14,11 +14,11 @@ file build/kernel.elf
 readelf -h build/kernel.elf
 ```
 
-The expected file is an ELF32 executable for Intel 80386. The authoring environment successfully compiled and linked it with warnings treated as errors.
+The expected file is an ELF32 executable for Intel 80386. Compilation and linking passed with warnings treated as errors.
 
 ## Boot locally with additional tools
 
-A compatible GRUB installation, `grub-mkrescue`, `xorriso`, and QEMU are needed for this route. These were unavailable in the authoring environment; **no actual native-kernel boot is claimed**.
+A compatible GRUB installation, `grub-mkrescue`, `xorriso`, and QEMU are needed for this route. They were unavailable during the recorded check, so native-kernel boot remains unverified.
 
 ```bash
 mkdir -p build/iso/boot/grub

@@ -1,10 +1,14 @@
 # Bare Metal
 
-An upgrade of the existing **CL-fromgithub** Django final-year project. Learn a focused progression of low-level and systems languages, practise beside the explanation, inspect virtual hardware components, and build a first operating-system boot image.
+Bare Metal is a Django learning environment for low-level programming and computer systems. Work through a focused sequence, run code beside each explanation, inspect virtual components, and build a first operating-system boot image.
 
-**Machine code → RV32I assembly → C → Rust → Verilog → operating-system foundations**
+**Machine code → RV32I assembly → C → device foundations**, with branches into **Rust access rules**, **Verilog logic**, and **operating-system foundations**.
 
-The package includes 33 authored lessons, 13 open hardware configuration labs, integrated green-and-black terminals, private drafts and progress, and per-user hosted 512-byte boot images. Hardware views are selectable, rotatable, and zoomable conceptual models. There are no external code-runner calls or editor CDN dependencies.
+The curriculum includes 41 lessons in seven tracks, 13 open hardware configuration labs, and 98 runnable programs in the documentation. Every guide identifies prerequisites, explains the mechanism, and connects a predicted result to the terminal beside it. **Load in terminal** loads a matching example without executing it; **Restore draft** restores the source present before the most recent example load.
+
+The eight device-foundation lessons cover register contracts, activation/timeout, physical timing, interrupts/DMA/caches, byte protocols, resource/failure limits, clocked state, and the two-qubit quantum model. C and assembly can express the site's virtual profiles; actual hardware additionally requires the controller/platform contract and observed validation. Read [the curriculum and configuration map](docs/CURRICULUM_AND_CONFIGURATION.md) for the exact progression and boundaries.
+
+The integrated green-and-black workspaces retain private drafts, progress, and per-user hosted 512-byte boot images. Hardware views are selectable, rotatable, and zoomable conceptual models. There are no external code-runner calls or editor CDN dependencies.
 
 ## Run on Linux / macOS
 
@@ -34,7 +38,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe manage.py runserver
 ```
 
-No existing account, database, password, virtual environment, or private user data is distributed in the upgraded archive. A fresh database is created by migrate. Keep your previous database backed up if upgrading an existing local installation; apply migration 0006 and the seed commands. Historical progress rows are retained, but the old ambiguous language-level counter is not converted into invented per-lesson completions.
+No account, database, password, virtual environment, or private user data is stored in this repository. A fresh database is created by migrate. For an existing installation, stop the app server and run `python manage.py prepare_deployment`: it backs up SQLite, applies the full migration history through 0007, seeds the current catalogue, collects static files, and checks Django. Historical lessons outside the catalogue are archived from navigation; their database rows, completions, and drafts are retained. Old x86 lessons can no longer open in the C terminal. The old ambiguous language-level counter is not converted into invented per-lesson completions.
 
 ## Verify
 
@@ -53,7 +57,7 @@ python tools/native_reference_check.py
 bash tools/build_kernel.sh
 ```
 
-The browser check was **not run successfully in the authoring environment**, where browser installation and access to local addresses were blocked. Run it against your disposable local development database to verify screenshots, password toggles, drafts, model controls, boot-image workflow, and mobile overflow:
+The recorded browser check could not run because Chromium was unavailable. Run it against a disposable local development database to verify password toggles, drafts, model controls, the boot-image workflow, and mobile layout:
 
 ```bash
 npm install --no-save playwright
@@ -75,13 +79,13 @@ The script creates a synthetic QA account and its own test boot images. It write
 | OS workspace | Actual x86 16-bit BIOS sector bytes and a boot-subset emulator | Private 512-byte images; no complete kernel/ELF execution in the site |
 | Hardware | Virtual register writes, target checks, component telemetry | No physical RAM, server, satellite, cooling, or QPU control |
 
-See [Runner reference](docs/RUNNER_REFERENCE.md), [Setup and deployment](docs/SETUP_AND_DEPLOYMENT.md), [Project report](docs/PROJECT_REPORT.md), [Testing evidence](docs/TEST_REPORT.md), and [Project memory brief](docs/PROJECT_MEMORY.md).
+See [Runner reference](docs/RUNNER_REFERENCE.md), [Setup and deployment](docs/SETUP_AND_DEPLOYMENT.md), [Project report](docs/PROJECT_REPORT.md), [Documentation upgrade report](docs/DOCUMENTATION_UPGRADE_REPORT.md), and [Testing evidence](docs/TEST_REPORT.md).
 
 The separate `examples/minikernel` builds a freestanding 32-bit Multiboot ELF kernel. Its build and link were verified; its QEMU or hardware boot was not verified here. See [the kernel guide](examples/minikernel/README.md).
 
 ## Directory map
 
-- `core/content/`: lesson and configuration catalogues, and original authored Markdown teaching.
+- `core/content/`: lesson and configuration catalogues and Markdown teaching.
 - `core/runtime/`: bounded C, RV32I, Rust, Verilog, and x86 boot engines.
 - `core/views.py`, `core/models.py`: authentication, progress, execution, drafts, and boot ownership.
 - `core/static/core/`: terminal styles, interactions, and component-model drawing.
@@ -89,4 +93,4 @@ The separate `examples/minikernel` builds a freestanding 32-bit Multiboot ELF ke
 - `core/tests.py`, `tools/`: automated verification and reproducible build scripts.
 - `docs/`: audit, report, requirements, exact runner contracts, and presentation/demo guide.
 
-This continues the supplied repository and its migration history. The owner has applied the original upgrade to GitHub and a dev tunnel. See [Performance and deployment](docs/PERFORMANCE_AND_DEPLOYMENT.md) for measurements and the steps to activate future pushes. The authoring environment has not pushed or restarted the owner's server.
+The repository preserves the project's migration history. See [Performance and deployment](docs/PERFORMANCE_AND_DEPLOYMENT.md) for measurements and service update steps. Pushing a commit does not update a running server: pull it into the deployed checkout, prepare the database and static files, then restart the process.

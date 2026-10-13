@@ -1,5 +1,5 @@
 Creating test database for alias 'default'...
-./workspace/scratch/1d39d7611884/.runtime/django/core/handlers/base.py:63: UserWarning: No directory at: /workspace/scratch/1d39d7611884/low-level-site-current/staticfiles/
+[test environment]/django/core/handlers/base.py:63: UserWarning: No directory at: [project]/staticfiles/
   mw_instance = middleware(adapted_handler)
 ......................................................................................................................................................................
 ----------------------------------------------------------------------
